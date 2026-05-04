@@ -13,7 +13,7 @@ import (
 )
 
 type PackageService interface {
-	BindPackage(ctx service.Context, applicationKey string, request *model.BindPackageRequest) error
+	BindPackage(ctx service.Context, applicationKey string, request *model.BindPackageRequest) ([]byte, error)
 	UnbindPackage(ctx service.Context, applicationKey, pkgType, pkgName, pkgVersion string) error
 }
 
@@ -23,21 +23,20 @@ func NewPackageService() PackageService {
 	return &packageService{}
 }
 
-func (ps *packageService) BindPackage(ctx service.Context, applicationKey string, request *model.BindPackageRequest) error {
+func (ps *packageService) BindPackage(ctx service.Context, applicationKey string, request *model.BindPackageRequest) ([]byte, error) {
 	endpoint := fmt.Sprintf("/v1/applications/%s/packages", applicationKey)
 	response, responseBody, err := ctx.GetHttpClient().Post(endpoint, request, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if response.StatusCode != http.StatusCreated {
-		return fmt.Errorf("failed to bind package. Status code: %d.\n%s",
+		return nil, fmt.Errorf("failed to bind package. Status code: %d.\n%s",
 			response.StatusCode, responseBody)
 	}
 
 	log.Info("Package bound successfully.")
-	log.Output(string(responseBody))
-	return nil
+	return responseBody, nil
 }
 
 func (ps *packageService) UnbindPackage(ctx service.Context, applicationKey, pkgType, pkgName, pkgVersion string) error {

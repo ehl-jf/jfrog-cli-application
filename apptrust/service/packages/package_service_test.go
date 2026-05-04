@@ -73,7 +73,7 @@ func TestBindPackage(t *testing.T) {
 			mockCtx := mockservice.NewMockContext(ctrl)
 			mockCtx.EXPECT().GetHttpClient().Return(mockHttpClient).Times(1)
 
-			err := service.BindPackage(mockCtx, applicationKey, tt.request)
+			_, err := service.BindPackage(mockCtx, applicationKey, tt.request)
 			if tt.expectedError == "" {
 				assert.NoError(t, err)
 			} else {

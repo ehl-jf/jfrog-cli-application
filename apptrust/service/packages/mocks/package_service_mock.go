@@ -42,11 +42,12 @@ func (m *MockPackageService) EXPECT() *MockPackageServiceMockRecorder {
 }
 
 // BindPackage mocks base method.
-func (m *MockPackageService) BindPackage(ctx service.Context, applicationKey string, request *model.BindPackageRequest) error {
+func (m *MockPackageService) BindPackage(ctx service.Context, applicationKey string, request *model.BindPackageRequest) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BindPackage", ctx, applicationKey, request)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // BindPackage indicates an expected call of BindPackage.
