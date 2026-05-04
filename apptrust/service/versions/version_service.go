@@ -21,7 +21,7 @@ type VersionService interface {
 	RollbackAppVersion(ctx service.Context, applicationKey string, version string, request *model.RollbackAppVersionRequest, sync bool) error
 	DeleteAppVersion(ctx service.Context, applicationKey string, version string) error
 	UpdateAppVersion(ctx service.Context, applicationKey string, version string, request *model.UpdateAppVersionRequest) ([]byte, error)
-	UpdateAppVersionSources(ctx service.Context, applicationKey string, version string, request *model.UpdateVersionSourcesRequest, sync bool, dryRun bool, failFast bool) error
+	UpdateAppVersionSources(ctx service.Context, applicationKey string, version string, request *model.UpdateVersionSourcesRequest, sync bool, dryRun bool, failFast bool) ([]byte, error)
 }
 
 type versionService struct{}
@@ -125,7 +125,7 @@ func (vs *versionService) UpdateAppVersion(ctx service.Context, applicationKey s
 	return responseBody, nil
 }
 
-func (vs *versionService) UpdateAppVersionSources(ctx service.Context, applicationKey string, version string, request *model.UpdateVersionSourcesRequest, sync bool, dryRun bool, failFast bool) error {
+func (vs *versionService) UpdateAppVersionSources(ctx service.Context, applicationKey string, version string, request *model.UpdateVersionSourcesRequest, sync bool, dryRun bool, failFast bool) ([]byte, error) {
 	endpoint := fmt.Sprintf("/v1/applications/%s/versions/%s", applicationKey, version)
 
 	params := map[string]string{
@@ -136,7 +136,7 @@ func (vs *versionService) UpdateAppVersionSources(ctx service.Context, applicati
 
 	response, responseBody, err := ctx.GetHttpClient().Patch(endpoint, request, params)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	expectedStatusCode := http.StatusOK
@@ -145,13 +145,12 @@ func (vs *versionService) UpdateAppVersionSources(ctx service.Context, applicati
 	}
 
 	if response.StatusCode != expectedStatusCode {
-		return fmt.Errorf("failed to update app version sources. Status code: %d. \n%s",
+		return nil, fmt.Errorf("failed to update app version sources. Status code: %d. \n%s",
 			response.StatusCode, responseBody)
 	}
 
 	log.Info("Application version sources updated successfully.")
-	log.Output(string(responseBody))
-	return nil
+	return responseBody, nil
 }
 
 func logSuccessMessage(sync bool, request *model.CreateAppVersionRequest, dryRun bool) {
