@@ -71,11 +71,12 @@ func (mr *MockApplicationServiceMockRecorder) DeleteApplication(ctx, application
 }
 
 // UpdateApplication mocks base method.
-func (m *MockApplicationService) UpdateApplication(ctx service.Context, requestBody *model.AppDescriptor) error {
+func (m *MockApplicationService) UpdateApplication(ctx service.Context, requestBody *model.AppDescriptor) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateApplication", ctx, requestBody)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // UpdateApplication indicates an expected call of UpdateApplication.

@@ -1,6 +1,12 @@
 package application
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"os"
+	"text/tabwriter"
+
 	pluginsCommon "github.com/jfrog/jfrog-cli-core/v2/plugins/common"
 
 	"github.com/jfrog/jfrog-cli-application/apptrust/app"
@@ -11,14 +17,18 @@ import (
 	"github.com/jfrog/jfrog-cli-application/apptrust/service"
 	"github.com/jfrog/jfrog-cli-application/apptrust/service/applications"
 	commonCLiCommands "github.com/jfrog/jfrog-cli-core/v2/common/commands"
+	coreformat "github.com/jfrog/jfrog-cli-core/v2/common/format"
 	"github.com/jfrog/jfrog-cli-core/v2/plugins/components"
 	coreConfig "github.com/jfrog/jfrog-cli-core/v2/utils/config"
+	clientUtils "github.com/jfrog/jfrog-client-go/utils"
+	"github.com/jfrog/jfrog-client-go/utils/log"
 )
 
 type updateAppCommand struct {
 	serverDetails      *coreConfig.ServerDetails
 	applicationService applications.ApplicationService
 	requestBody        *model.AppDescriptor
+	responseBody       []byte
 }
 
 func (uac *updateAppCommand) Run() error {
@@ -27,7 +37,8 @@ func (uac *updateAppCommand) Run() error {
 		return err
 	}
 
-	return uac.applicationService.UpdateApplication(ctx, uac.requestBody)
+	uac.responseBody, err = uac.applicationService.UpdateApplication(ctx, uac.requestBody)
+	return err
 }
 
 func (uac *updateAppCommand) ServerDetails() (*coreConfig.ServerDetails, error) {
@@ -69,7 +80,67 @@ func (uac *updateAppCommand) prepareAndRunCommand(ctx *components.Context) error
 		return err
 	}
 
-	return commonCLiCommands.Exec(uac)
+	outputFormat, err := ctx.GetOutputFormat()
+	if err != nil {
+		return err
+	}
+
+	if err = commonCLiCommands.Exec(uac); err != nil {
+		return err
+	}
+
+	return printUpdateAppResponse(uac.responseBody, outputFormat, os.Stdout)
+}
+
+// orderedUpdateAppKeys defines the display order for app-update table output.
+var orderedUpdateAppKeys = []string{
+	"application_key",
+	"application_name",
+	"project_key",
+	"description",
+	"criticality",
+	"maturity_level",
+}
+
+// printUpdateAppResponse formats and prints the update-application response.
+// When outputFormat is Table it renders a FIELD/VALUE table; when Json it
+// pretty-prints the raw JSON; when None (flag absent) it falls back to the
+// previous log.Output behaviour for backward-compatibility.
+func printUpdateAppResponse(data []byte, outputFormat coreformat.OutputFormat, w io.Writer) error {
+	switch outputFormat {
+	case coreformat.Json:
+		log.Output(clientUtils.IndentJson(data))
+		return nil
+	case coreformat.Table:
+		return printUpdateAppTable(data, w)
+	default:
+		// No --format flag provided: preserve the original output behaviour.
+		log.Output(string(data))
+		return nil
+	}
+}
+
+// printUpdateAppTable renders the update-application response as a FIELD/VALUE table.
+func printUpdateAppTable(data []byte, w io.Writer) error {
+	var fields map[string]interface{}
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return fmt.Errorf("failed to parse application response: %w", err)
+	}
+
+	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(tw, "FIELD\tVALUE")
+	for _, key := range orderedUpdateAppKeys {
+		val, ok := fields[key]
+		if !ok || val == nil {
+			continue
+		}
+		strVal := fmt.Sprintf("%v", val)
+		if strVal == "" {
+			continue
+		}
+		fmt.Fprintf(tw, "%s\t%s\n", key, strVal)
+	}
+	return tw.Flush()
 }
 
 func GetUpdateAppCommand(appContext app.Context) components.Command {
@@ -77,10 +148,11 @@ func GetUpdateAppCommand(appContext app.Context) components.Command {
 		applicationService: appContext.GetApplicationService(),
 	}
 	return components.Command{
-		Name:        commands.AppUpdate,
-		Description: "Update an existing application",
-		Category:    common.CategoryApplication,
-		Aliases:     []string{"au"},
+		Name:             commands.AppUpdate,
+		Description:      "Update an existing application",
+		Category:         common.CategoryApplication,
+		Aliases:          []string{"au"},
+		SupportedFormats: []coreformat.OutputFormat{coreformat.Table, coreformat.Json},
 		Arguments: []components.Argument{
 			{
 				Name:        "application-key",

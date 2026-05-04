@@ -15,7 +15,7 @@ import (
 
 type ApplicationService interface {
 	CreateApplication(ctx service.Context, requestBody *model.AppDescriptor) ([]byte, error)
-	UpdateApplication(ctx service.Context, requestBody *model.AppDescriptor) error
+	UpdateApplication(ctx service.Context, requestBody *model.AppDescriptor) ([]byte, error)
 	DeleteApplication(ctx service.Context, applicationKey string) error
 }
 
@@ -40,21 +40,20 @@ func (as *applicationService) CreateApplication(ctx service.Context, requestBody
 	return responseBody, nil
 }
 
-func (as *applicationService) UpdateApplication(ctx service.Context, requestBody *model.AppDescriptor) error {
+func (as *applicationService) UpdateApplication(ctx service.Context, requestBody *model.AppDescriptor) ([]byte, error) {
 	endpoint := fmt.Sprintf("/v1/applications/%s", requestBody.ApplicationKey)
 	response, responseBody, err := ctx.GetHttpClient().Patch(endpoint, requestBody, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return errorutils.CheckErrorf("failed to update application. Status code: %d.\n%s",
+		return nil, errorutils.CheckErrorf("failed to update application. Status code: %d.\n%s",
 			response.StatusCode, responseBody)
 	}
 
 	log.Info(fmt.Sprintf("Application \"%s\" updated successfully.", requestBody.ApplicationKey))
-	log.Output(string(responseBody))
-	return nil
+	return responseBody, nil
 }
 
 func (as *applicationService) DeleteApplication(ctx service.Context, applicationKey string) error {
