@@ -20,7 +20,7 @@ type VersionService interface {
 	ReleaseAppVersion(ctx service.Context, applicationKey string, version string, request *model.ReleaseAppVersionRequest, sync bool) ([]byte, error)
 	RollbackAppVersion(ctx service.Context, applicationKey string, version string, request *model.RollbackAppVersionRequest, sync bool) error
 	DeleteAppVersion(ctx service.Context, applicationKey string, version string) error
-	UpdateAppVersion(ctx service.Context, applicationKey string, version string, request *model.UpdateAppVersionRequest) error
+	UpdateAppVersion(ctx service.Context, applicationKey string, version string, request *model.UpdateAppVersionRequest) ([]byte, error)
 	UpdateAppVersionSources(ctx service.Context, applicationKey string, version string, request *model.UpdateVersionSourcesRequest, sync bool, dryRun bool, failFast bool) error
 }
 
@@ -109,20 +109,20 @@ func (vs *versionService) DeleteAppVersion(ctx service.Context, applicationKey, 
 	return nil
 }
 
-func (vs *versionService) UpdateAppVersion(ctx service.Context, applicationKey string, version string, request *model.UpdateAppVersionRequest) error {
+func (vs *versionService) UpdateAppVersion(ctx service.Context, applicationKey string, version string, request *model.UpdateAppVersionRequest) ([]byte, error) {
 	endpoint := fmt.Sprintf("/v1/applications/%s/versions/%s", applicationKey, version)
 	response, responseBody, err := ctx.GetHttpClient().Patch(endpoint, request, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf("failed to update app version. Status code: %d. \n%s",
+		return nil, fmt.Errorf("failed to update app version. Status code: %d. \n%s",
 			response.StatusCode, responseBody)
 	}
 
 	log.Info("Application version updated successfully.")
-	return nil
+	return responseBody, nil
 }
 
 func (vs *versionService) UpdateAppVersionSources(ctx service.Context, applicationKey string, version string, request *model.UpdateVersionSourcesRequest, sync bool, dryRun bool, failFast bool) error {

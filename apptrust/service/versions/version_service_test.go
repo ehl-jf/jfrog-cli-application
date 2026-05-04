@@ -445,7 +445,7 @@ func TestUpdateAppVersion(t *testing.T) {
 			mockCtx := mockservice.NewMockContext(ctrl)
 			mockCtx.EXPECT().GetHttpClient().Return(mockHttpClient).AnyTimes()
 
-			err := service.UpdateAppVersion(mockCtx, "test-app", "1.0.0", tt.request)
+			_, err := service.UpdateAppVersion(mockCtx, "test-app", "1.0.0", tt.request)
 			if tt.expectError {
 				assert.Error(t, err)
 				if tt.errorMsg != "" {
