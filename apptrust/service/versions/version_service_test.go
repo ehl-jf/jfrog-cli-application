@@ -213,7 +213,7 @@ func TestPromoteAppVersion(t *testing.T) {
 			mockCtx := mockservice.NewMockContext(ctrl)
 			mockCtx.EXPECT().GetHttpClient().Return(mockHttpClient).Times(1)
 
-			err := service.PromoteAppVersion(mockCtx, tt.applicationKey, tt.version, tt.payload, tt.sync)
+			_, err := service.PromoteAppVersion(mockCtx, tt.applicationKey, tt.version, tt.payload, tt.sync)
 			if tt.expectedError == "" {
 				assert.NoError(t, err)
 			} else {
