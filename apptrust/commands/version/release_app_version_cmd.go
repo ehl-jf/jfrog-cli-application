@@ -3,6 +3,12 @@ package version
 //go:generate ${PROJECT_DIR}/scripts/mockgen.sh ${GOFILE}
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"os"
+	"text/tabwriter"
+
 	"github.com/jfrog/jfrog-cli-application/apptrust/app"
 	"github.com/jfrog/jfrog-cli-application/apptrust/commands"
 	"github.com/jfrog/jfrog-cli-application/apptrust/commands/utils"
@@ -11,10 +17,13 @@ import (
 	"github.com/jfrog/jfrog-cli-application/apptrust/service"
 	"github.com/jfrog/jfrog-cli-application/apptrust/service/versions"
 	commonCLiCommands "github.com/jfrog/jfrog-cli-core/v2/common/commands"
+	coreformat "github.com/jfrog/jfrog-cli-core/v2/common/format"
 	pluginsCommon "github.com/jfrog/jfrog-cli-core/v2/plugins/common"
 	"github.com/jfrog/jfrog-cli-core/v2/plugins/components"
 	coreConfig "github.com/jfrog/jfrog-cli-core/v2/utils/config"
+	clientUtils "github.com/jfrog/jfrog-client-go/utils"
 	"github.com/jfrog/jfrog-client-go/utils/errorutils"
+	"github.com/jfrog/jfrog-client-go/utils/log"
 )
 
 type releaseAppVersionCommand struct {
@@ -24,6 +33,7 @@ type releaseAppVersionCommand struct {
 	version        string
 	requestPayload *model.ReleaseAppVersionRequest
 	sync           bool
+	responseBody   []byte
 }
 
 func (rv *releaseAppVersionCommand) Run() error {
@@ -32,7 +42,8 @@ func (rv *releaseAppVersionCommand) Run() error {
 		return err
 	}
 
-	return rv.versionService.ReleaseAppVersion(ctx, rv.applicationKey, rv.version, rv.requestPayload, rv.sync)
+	rv.responseBody, err = rv.versionService.ReleaseAppVersion(ctx, rv.applicationKey, rv.version, rv.requestPayload, rv.sync)
+	return err
 }
 
 func (rv *releaseAppVersionCommand) ServerDetails() (*coreConfig.ServerDetails, error) {
@@ -64,7 +75,66 @@ func (rv *releaseAppVersionCommand) prepareAndRunCommand(ctx *components.Context
 	if errorutils.CheckError(err) != nil {
 		return err
 	}
-	return commonCLiCommands.Exec(rv)
+
+	outputFormat, err := ctx.GetOutputFormat()
+	if err != nil {
+		return err
+	}
+
+	if err = commonCLiCommands.Exec(rv); err != nil {
+		return err
+	}
+
+	return printReleaseAppVersionResponse(rv.responseBody, outputFormat, os.Stdout)
+}
+
+// orderedReleaseAppVersionKeys defines the display order for version-release table output.
+var orderedReleaseAppVersionKeys = []string{
+	"application_key",
+	"version",
+	"status",
+	"current_stage",
+}
+
+// printReleaseAppVersionResponse formats and prints the release-app-version response.
+// When outputFormat is Table it renders a FIELD/VALUE table; when Json it
+// pretty-prints the raw JSON; when None (flag absent) it falls back to the
+// previous log.Output behaviour for backward-compatibility.
+func printReleaseAppVersionResponse(data []byte, outputFormat coreformat.OutputFormat, w io.Writer) error {
+	switch outputFormat {
+	case coreformat.Json:
+		log.Output(clientUtils.IndentJson(data))
+		return nil
+	case coreformat.Table:
+		return printReleaseAppVersionTable(data, w)
+	default:
+		// No --format flag provided: preserve the original output behaviour.
+		log.Output(string(data))
+		return nil
+	}
+}
+
+// printReleaseAppVersionTable renders the release-app-version response as a FIELD/VALUE table.
+func printReleaseAppVersionTable(data []byte, w io.Writer) error {
+	var fields map[string]interface{}
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return fmt.Errorf("failed to parse release response: %w", err)
+	}
+
+	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(tw, "FIELD\tVALUE")
+	for _, key := range orderedReleaseAppVersionKeys {
+		val, ok := fields[key]
+		if !ok || val == nil {
+			continue
+		}
+		strVal := fmt.Sprintf("%v", val)
+		if strVal == "" {
+			continue
+		}
+		fmt.Fprintf(tw, "%s\t%s\n", key, strVal)
+	}
+	return tw.Flush()
 }
 
 func (rv *releaseAppVersionCommand) buildRequestPayload(ctx *components.Context) (*model.ReleaseAppVersionRequest, error) {
@@ -113,7 +183,8 @@ func GetReleaseAppVersionCommand(appContext app.Context) components.Command {
 				Optional:    false,
 			},
 		},
-		Flags:  commands.GetCommandFlags(commands.VersionRelease),
-		Action: cmd.prepareAndRunCommand,
+		Flags:            commands.GetCommandFlags(commands.VersionRelease),
+		SupportedFormats: []coreformat.OutputFormat{coreformat.Table, coreformat.Json},
+		Action:           cmd.prepareAndRunCommand,
 	}
 }

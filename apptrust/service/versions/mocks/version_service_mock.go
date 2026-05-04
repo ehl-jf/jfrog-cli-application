@@ -86,11 +86,12 @@ func (mr *MockVersionServiceMockRecorder) PromoteAppVersion(ctx, applicationKey,
 }
 
 // ReleaseAppVersion mocks base method.
-func (m *MockVersionService) ReleaseAppVersion(ctx service.Context, applicationKey, version string, request *model.ReleaseAppVersionRequest, sync bool) error {
+func (m *MockVersionService) ReleaseAppVersion(ctx service.Context, applicationKey, version string, request *model.ReleaseAppVersionRequest, sync bool) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReleaseAppVersion", ctx, applicationKey, version, request, sync)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // ReleaseAppVersion indicates an expected call of ReleaseAppVersion.
