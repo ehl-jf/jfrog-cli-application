@@ -1,11 +1,7 @@
 package application
 
 import (
-	"encoding/json"
-	"fmt"
-	"io"
 	"os"
-	"text/tabwriter"
 
 	pluginsCommon "github.com/jfrog/jfrog-cli-core/v2/plugins/common"
 
@@ -20,8 +16,6 @@ import (
 	coreformat "github.com/jfrog/jfrog-cli-core/v2/common/format"
 	"github.com/jfrog/jfrog-cli-core/v2/plugins/components"
 	coreConfig "github.com/jfrog/jfrog-cli-core/v2/utils/config"
-	clientUtils "github.com/jfrog/jfrog-client-go/utils"
-	"github.com/jfrog/jfrog-client-go/utils/log"
 )
 
 type updateAppCommand struct {
@@ -89,7 +83,7 @@ func (uac *updateAppCommand) prepareAndRunCommand(ctx *components.Context) error
 		return err
 	}
 
-	return printUpdateAppResponse(uac.responseBody, outputFormat, os.Stdout)
+	return common.PrintJsonOrTableResponse(uac.responseBody, outputFormat, os.Stdout, orderedUpdateAppKeys)
 }
 
 // orderedUpdateAppKeys defines the display order for app-update table output.
@@ -102,46 +96,6 @@ var orderedUpdateAppKeys = []string{
 	"maturity_level",
 }
 
-// printUpdateAppResponse formats and prints the update-application response.
-// When outputFormat is Table it renders a FIELD/VALUE table; when Json it
-// pretty-prints the raw JSON; when None (flag absent) it falls back to the
-// previous log.Output behaviour for backward-compatibility.
-func printUpdateAppResponse(data []byte, outputFormat coreformat.OutputFormat, w io.Writer) error {
-	switch outputFormat {
-	case coreformat.Json:
-		log.Output(clientUtils.IndentJson(data))
-		return nil
-	case coreformat.Table:
-		return printUpdateAppTable(data, w)
-	default:
-		// No --format flag provided: preserve the original output behaviour.
-		log.Output(string(data))
-		return nil
-	}
-}
-
-// printUpdateAppTable renders the update-application response as a FIELD/VALUE table.
-func printUpdateAppTable(data []byte, w io.Writer) error {
-	var fields map[string]interface{}
-	if err := json.Unmarshal(data, &fields); err != nil {
-		return fmt.Errorf("failed to parse application response: %w", err)
-	}
-
-	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(tw, "FIELD\tVALUE")
-	for _, key := range orderedUpdateAppKeys {
-		val, ok := fields[key]
-		if !ok || val == nil {
-			continue
-		}
-		strVal := fmt.Sprintf("%v", val)
-		if strVal == "" {
-			continue
-		}
-		fmt.Fprintf(tw, "%s\t%s\n", key, strVal)
-	}
-	return tw.Flush()
-}
 
 func GetUpdateAppCommand(appContext app.Context) components.Command {
 	cmd := &updateAppCommand{

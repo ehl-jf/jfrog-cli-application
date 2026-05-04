@@ -3,11 +3,7 @@ package version
 //go:generate ${PROJECT_DIR}/scripts/mockgen.sh ${GOFILE}
 
 import (
-	"encoding/json"
-	"fmt"
-	"io"
 	"os"
-	"text/tabwriter"
 
 	"github.com/jfrog/jfrog-cli-application/apptrust/app"
 	"github.com/jfrog/jfrog-cli-application/apptrust/commands"
@@ -21,8 +17,6 @@ import (
 	pluginsCommon "github.com/jfrog/jfrog-cli-core/v2/plugins/common"
 	"github.com/jfrog/jfrog-cli-core/v2/plugins/components"
 	coreConfig "github.com/jfrog/jfrog-cli-core/v2/utils/config"
-	clientUtils "github.com/jfrog/jfrog-client-go/utils"
-	"github.com/jfrog/jfrog-client-go/utils/log"
 )
 
 type rollbackAppVersionCommand struct {
@@ -81,7 +75,7 @@ func (rv *rollbackAppVersionCommand) prepareAndRunCommand(ctx *components.Contex
 		return err
 	}
 
-	return printRollbackAppVersionResponse(rv.responseBody, outputFormat, os.Stdout)
+	return common.PrintJsonOrTableResponse(rv.responseBody, outputFormat, os.Stdout, orderedRollbackAppVersionKeys)
 }
 
 // orderedRollbackAppVersionKeys defines the display order for version-rollback table output.
@@ -93,46 +87,6 @@ var orderedRollbackAppVersionKeys = []string{
 	"rollback_to_stage",
 }
 
-// printRollbackAppVersionResponse formats and prints the rollback-app-version response.
-// When outputFormat is Table it renders a FIELD/VALUE table; when Json it
-// pretty-prints the raw JSON; when None (flag absent) it falls back to the
-// previous log.Output behaviour for backward-compatibility.
-func printRollbackAppVersionResponse(data []byte, outputFormat coreformat.OutputFormat, w io.Writer) error {
-	switch outputFormat {
-	case coreformat.Json:
-		log.Output(clientUtils.IndentJson(data))
-		return nil
-	case coreformat.Table:
-		return printRollbackAppVersionTable(data, w)
-	default:
-		// No --format flag provided: preserve the original output behaviour.
-		log.Output(string(data))
-		return nil
-	}
-}
-
-// printRollbackAppVersionTable renders the rollback-app-version response as a FIELD/VALUE table.
-func printRollbackAppVersionTable(data []byte, w io.Writer) error {
-	var fields map[string]interface{}
-	if err := json.Unmarshal(data, &fields); err != nil {
-		return fmt.Errorf("failed to parse rollback response: %w", err)
-	}
-
-	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(tw, "FIELD\tVALUE")
-	for _, key := range orderedRollbackAppVersionKeys {
-		val, ok := fields[key]
-		if !ok || val == nil {
-			continue
-		}
-		strVal := fmt.Sprintf("%v", val)
-		if strVal == "" {
-			continue
-		}
-		fmt.Fprintf(tw, "%s\t%s\n", key, strVal)
-	}
-	return tw.Flush()
-}
 
 func GetRollbackAppVersionCommand(appContext app.Context) components.Command {
 	cmd := &rollbackAppVersionCommand{
