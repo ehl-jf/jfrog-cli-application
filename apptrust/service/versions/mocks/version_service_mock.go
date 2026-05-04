@@ -42,11 +42,12 @@ func (m *MockVersionService) EXPECT() *MockVersionServiceMockRecorder {
 }
 
 // CreateAppVersion mocks base method.
-func (m *MockVersionService) CreateAppVersion(ctx service.Context, request *model.CreateAppVersionRequest, sync, dryRun bool) error {
+func (m *MockVersionService) CreateAppVersion(ctx service.Context, request *model.CreateAppVersionRequest, sync, dryRun bool) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateAppVersion", ctx, request, sync, dryRun)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // CreateAppVersion indicates an expected call of CreateAppVersion.

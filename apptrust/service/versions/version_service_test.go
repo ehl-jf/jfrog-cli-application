@@ -101,7 +101,7 @@ func TestCreateAppVersion(t *testing.T) {
 			mockCtx := mockservice.NewMockContext(ctrl)
 			mockCtx.EXPECT().GetHttpClient().Return(mockHttpClient).Times(1)
 
-			err := service.CreateAppVersion(mockCtx, tt.request, tt.sync, tt.dryRun)
+			_, err := service.CreateAppVersion(mockCtx, tt.request, tt.sync, tt.dryRun)
 			if tt.expectedError == "" {
 				assert.NoError(t, err)
 			} else {

@@ -15,7 +15,7 @@ import (
 )
 
 type VersionService interface {
-	CreateAppVersion(ctx service.Context, request *model.CreateAppVersionRequest, sync, dryRun bool) error
+	CreateAppVersion(ctx service.Context, request *model.CreateAppVersionRequest, sync, dryRun bool) ([]byte, error)
 	PromoteAppVersion(ctx service.Context, applicationKey string, version string, payload *model.PromoteAppVersionRequest, sync bool) error
 	ReleaseAppVersion(ctx service.Context, applicationKey string, version string, request *model.ReleaseAppVersionRequest, sync bool) error
 	RollbackAppVersion(ctx service.Context, applicationKey string, version string, request *model.RollbackAppVersionRequest, sync bool) error
@@ -30,22 +30,21 @@ func NewVersionService() VersionService {
 	return &versionService{}
 }
 
-func (vs *versionService) CreateAppVersion(ctx service.Context, request *model.CreateAppVersionRequest, sync, dryRun bool) error {
+func (vs *versionService) CreateAppVersion(ctx service.Context, request *model.CreateAppVersionRequest, sync, dryRun bool) ([]byte, error) {
 	endpoint := fmt.Sprintf("/v1/applications/%s/versions/", request.ApplicationKey)
 	response, responseBody, err := ctx.GetHttpClient().Post(endpoint, request,
 		map[string]string{"async": strconv.FormatBool(!sync), "dry_run": strconv.FormatBool(dryRun)})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if !apphttp.IsSuccessStatusCode(response.StatusCode) {
-		return fmt.Errorf("failed to create app version. Status code: %d. \n%s",
+		return nil, fmt.Errorf("failed to create app version. Status code: %d. \n%s",
 			response.StatusCode, responseBody)
 	}
 
 	logSuccessMessage(sync, request, dryRun)
-	log.Output(string(responseBody))
-	return nil
+	return responseBody, nil
 }
 
 func (vs *versionService) PromoteAppVersion(ctx service.Context, applicationKey, version string, request *model.PromoteAppVersionRequest, sync bool) error {
