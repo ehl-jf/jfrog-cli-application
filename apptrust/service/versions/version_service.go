@@ -18,7 +18,7 @@ type VersionService interface {
 	CreateAppVersion(ctx service.Context, request *model.CreateAppVersionRequest, sync, dryRun bool) ([]byte, error)
 	PromoteAppVersion(ctx service.Context, applicationKey string, version string, payload *model.PromoteAppVersionRequest, sync bool) ([]byte, error)
 	ReleaseAppVersion(ctx service.Context, applicationKey string, version string, request *model.ReleaseAppVersionRequest, sync bool) ([]byte, error)
-	RollbackAppVersion(ctx service.Context, applicationKey string, version string, request *model.RollbackAppVersionRequest, sync bool) error
+	RollbackAppVersion(ctx service.Context, applicationKey string, version string, request *model.RollbackAppVersionRequest, sync bool) ([]byte, error)
 	DeleteAppVersion(ctx service.Context, applicationKey string, version string) error
 	UpdateAppVersion(ctx service.Context, applicationKey string, version string, request *model.UpdateAppVersionRequest) ([]byte, error)
 	UpdateAppVersionSources(ctx service.Context, applicationKey string, version string, request *model.UpdateVersionSourcesRequest, sync bool, dryRun bool, failFast bool) ([]byte, error)
@@ -77,20 +77,19 @@ func (vs *versionService) ReleaseAppVersion(ctx service.Context, applicationKey,
 	return responseBody, nil
 }
 
-func (vs *versionService) RollbackAppVersion(ctx service.Context, applicationKey, version string, request *model.RollbackAppVersionRequest, sync bool) error {
+func (vs *versionService) RollbackAppVersion(ctx service.Context, applicationKey, version string, request *model.RollbackAppVersionRequest, sync bool) ([]byte, error) {
 	endpoint := fmt.Sprintf("/v1/applications/%s/versions/%s/rollback", applicationKey, version)
 	response, responseBody, err := ctx.GetHttpClient().Post(endpoint, request, map[string]string{"async": strconv.FormatBool(!sync)})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if !apphttp.IsSuccessStatusCode(response.StatusCode) {
-		return fmt.Errorf("failed to rollback app version. Status code: %d. \n%s",
+		return nil, fmt.Errorf("failed to rollback app version. Status code: %d. \n%s",
 			response.StatusCode, responseBody)
 	}
 
-	log.Output(string(responseBody))
-	return nil
+	return responseBody, nil
 }
 
 func (vs *versionService) DeleteAppVersion(ctx service.Context, applicationKey, version string) error {

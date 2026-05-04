@@ -101,11 +101,12 @@ func (mr *MockVersionServiceMockRecorder) ReleaseAppVersion(ctx, applicationKey,
 }
 
 // RollbackAppVersion mocks base method.
-func (m *MockVersionService) RollbackAppVersion(ctx service.Context, applicationKey, version string, request *model.RollbackAppVersionRequest, sync bool) error {
+func (m *MockVersionService) RollbackAppVersion(ctx service.Context, applicationKey, version string, request *model.RollbackAppVersionRequest, sync bool) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RollbackAppVersion", ctx, applicationKey, version, request, sync)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // RollbackAppVersion indicates an expected call of RollbackAppVersion.

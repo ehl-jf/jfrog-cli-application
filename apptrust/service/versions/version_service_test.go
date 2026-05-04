@@ -517,7 +517,7 @@ func TestRollbackAppVersion(t *testing.T) {
 				Return(&http.Response{StatusCode: tt.expectedStatus}, []byte(""), nil)
 
 			service := NewVersionService()
-			err := service.RollbackAppVersion(mockCtx, tt.applicationKey, tt.version, tt.payload, tt.sync)
+			_, err := service.RollbackAppVersion(mockCtx, tt.applicationKey, tt.version, tt.payload, tt.sync)
 
 			if tt.expectedError {
 				assert.Error(t, err)
