@@ -1,6 +1,8 @@
 package application
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"flag"
 	"testing"
@@ -9,6 +11,7 @@ import (
 
 	"github.com/jfrog/jfrog-cli-application/apptrust/model"
 	mockapps "github.com/jfrog/jfrog-cli-application/apptrust/service/applications/mocks"
+	coreformat "github.com/jfrog/jfrog-cli-core/v2/common/format"
 	"github.com/jfrog/jfrog-cli-core/v2/plugins/components"
 	"github.com/jfrog/jfrog-cli-core/v2/utils/config"
 	"github.com/stretchr/testify/assert"
@@ -52,7 +55,7 @@ func TestCreateAppCommand_Run_Flags(t *testing.T) {
 	}
 
 	mockAppService := mockapps.NewMockApplicationService(ctrl)
-	mockAppService.EXPECT().CreateApplication(gomock.Any(), requestPayload).Return(nil).Times(1)
+	mockAppService.EXPECT().CreateApplication(gomock.Any(), requestPayload).Return(nil, nil).Times(1)
 
 	cmd := &createAppCommand{
 		applicationService: mockAppService,
@@ -75,7 +78,7 @@ func TestCreateAppCommand_Error(t *testing.T) {
 	}
 
 	mockAppService := mockapps.NewMockApplicationService(ctrl)
-	mockAppService.EXPECT().CreateApplication(gomock.Any(), requestPayload).Return(errors.New("failed to create an application. Status code: 500")).Times(1)
+	mockAppService.EXPECT().CreateApplication(gomock.Any(), requestPayload).Return(nil, errors.New("failed to create an application. Status code: 500")).Times(1)
 
 	cmd := &createAppCommand{
 		applicationService: mockAppService,
@@ -162,9 +165,9 @@ func TestCreateAppCommand_Run_FullSpecFile(t *testing.T) {
 	var actualPayload *model.AppDescriptor
 	mockAppService := mockapps.NewMockApplicationService(ctrl)
 	mockAppService.EXPECT().CreateApplication(gomock.Any(), gomock.Any()).
-		DoAndReturn(func(_ interface{}, req *model.AppDescriptor) error {
+		DoAndReturn(func(_ interface{}, req *model.AppDescriptor) ([]byte, error) {
 			actualPayload = req
-			return nil
+			return nil, nil
 		}).Times(1)
 
 	cmd := &createAppCommand{
@@ -243,9 +246,9 @@ func TestCreateAppCommand_Run_SpecFile(t *testing.T) {
 			mockAppService := mockapps.NewMockApplicationService(ctrl)
 			if !tt.expectsError {
 				mockAppService.EXPECT().CreateApplication(gomock.Any(), gomock.Any()).
-					DoAndReturn(func(_ interface{}, req *model.AppDescriptor) error {
+					DoAndReturn(func(_ interface{}, req *model.AppDescriptor) ([]byte, error) {
 						actualPayload = req
-						return nil
+						return nil, nil
 					}).Times(1)
 			}
 
@@ -298,9 +301,9 @@ func TestCreateAppCommand_Run_SpecVars(t *testing.T) {
 	var actualPayload *model.AppDescriptor
 	mockAppService := mockapps.NewMockApplicationService(ctrl)
 	mockAppService.EXPECT().CreateApplication(gomock.Any(), gomock.Any()).
-		DoAndReturn(func(_ interface{}, req *model.AppDescriptor) error {
+		DoAndReturn(func(_ interface{}, req *model.AppDescriptor) ([]byte, error) {
 			actualPayload = req
-			return nil
+			return nil, nil
 		}).Times(1)
 
 	cmd := &createAppCommand{
@@ -333,4 +336,59 @@ func TestCreateAppCommand_Error_SpecAndFlags(t *testing.T) {
 	err := cmd.prepareAndRunCommand(ctx)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "the flag --project is not allowed when --spec is provided")
+}
+
+// --- printCreateAppResponse tests ---
+
+const sampleAppJSON = `{"application_key":"my-app","application_name":"My App","project_key":"proj1","criticality":"high","maturity_level":"production"}`
+
+func TestPrintCreateAppResponse_JSON(t *testing.T) {
+	var buf bytes.Buffer
+	err := printCreateAppResponse([]byte(sampleAppJSON), coreformat.Json, &buf)
+	assert.NoError(t, err)
+	// The JSON path goes through log.Output, not the writer — assert no error and valid JSON.
+	var parsed map[string]interface{}
+	assert.NoError(t, json.Unmarshal([]byte(sampleAppJSON), &parsed))
+}
+
+func TestPrintCreateAppResponse_Table(t *testing.T) {
+	var buf bytes.Buffer
+	err := printCreateAppResponse([]byte(sampleAppJSON), coreformat.Table, &buf)
+	assert.NoError(t, err)
+	output := buf.String()
+	assert.Contains(t, output, "FIELD")
+	assert.Contains(t, output, "VALUE")
+	assert.Contains(t, output, "application_key")
+	assert.Contains(t, output, "my-app")
+	assert.Contains(t, output, "application_name")
+	assert.Contains(t, output, "My App")
+	assert.Contains(t, output, "project_key")
+	assert.Contains(t, output, "proj1")
+}
+
+func TestPrintCreateAppResponse_Table_AbsentFieldsOmitted(t *testing.T) {
+	// Only application_key is present — other fields must be absent from output.
+	payload := `{"application_key":"only-key"}`
+	var buf bytes.Buffer
+	err := printCreateAppResponse([]byte(payload), coreformat.Table, &buf)
+	assert.NoError(t, err)
+	output := buf.String()
+	assert.Contains(t, output, "application_key")
+	assert.Contains(t, output, "only-key")
+	assert.NotContains(t, output, "application_name")
+	assert.NotContains(t, output, "project_key")
+}
+
+func TestPrintCreateAppResponse_None_BackwardCompat(t *testing.T) {
+	// When outputFormat is None (no flag set), the function must not error.
+	var buf bytes.Buffer
+	err := printCreateAppResponse([]byte(sampleAppJSON), coreformat.None, &buf)
+	assert.NoError(t, err)
+}
+
+func TestPrintCreateAppResponse_Table_InvalidJSON(t *testing.T) {
+	var buf bytes.Buffer
+	err := printCreateAppResponse([]byte("not-json"), coreformat.Table, &buf)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to parse application response")
 }

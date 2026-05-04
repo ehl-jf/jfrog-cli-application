@@ -14,7 +14,7 @@ import (
 )
 
 type ApplicationService interface {
-	CreateApplication(ctx service.Context, requestBody *model.AppDescriptor) error
+	CreateApplication(ctx service.Context, requestBody *model.AppDescriptor) ([]byte, error)
 	UpdateApplication(ctx service.Context, requestBody *model.AppDescriptor) error
 	DeleteApplication(ctx service.Context, applicationKey string) error
 }
@@ -25,20 +25,19 @@ func NewApplicationService() ApplicationService {
 	return &applicationService{}
 }
 
-func (as *applicationService) CreateApplication(ctx service.Context, requestBody *model.AppDescriptor) error {
+func (as *applicationService) CreateApplication(ctx service.Context, requestBody *model.AppDescriptor) ([]byte, error) {
 	response, responseBody, err := ctx.GetHttpClient().Post("/v1/applications", requestBody, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if response.StatusCode != http.StatusCreated {
-		return errorutils.CheckErrorf("failed to create an application. Status code: %d.\n%s",
+		return nil, errorutils.CheckErrorf("failed to create an application. Status code: %d.\n%s",
 			response.StatusCode, responseBody)
 	}
 
 	log.Info(fmt.Sprintf("Application \"%s\" created successfully.", requestBody.ApplicationKey))
-	log.Output(string(responseBody))
-	return nil
+	return responseBody, nil
 }
 
 func (as *applicationService) UpdateApplication(ctx service.Context, requestBody *model.AppDescriptor) error {

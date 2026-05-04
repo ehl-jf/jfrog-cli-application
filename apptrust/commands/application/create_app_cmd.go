@@ -2,6 +2,10 @@ package application
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
+	"os"
+	"text/tabwriter"
 
 	pluginsCommon "github.com/jfrog/jfrog-cli-core/v2/plugins/common"
 
@@ -9,11 +13,14 @@ import (
 	"github.com/jfrog/jfrog-cli-application/apptrust/model"
 	"github.com/jfrog/jfrog-cli-application/apptrust/service"
 	commonCLiCommands "github.com/jfrog/jfrog-cli-core/v2/common/commands"
+	coreformat "github.com/jfrog/jfrog-cli-core/v2/common/format"
 	"github.com/jfrog/jfrog-cli-core/v2/plugins/components"
 	coreConfig "github.com/jfrog/jfrog-cli-core/v2/utils/config"
 	"github.com/jfrog/jfrog-cli-core/v2/utils/coreutils"
+	clientUtils "github.com/jfrog/jfrog-client-go/utils"
 	"github.com/jfrog/jfrog-client-go/utils/errorutils"
 	"github.com/jfrog/jfrog-client-go/utils/io/fileutils"
+	"github.com/jfrog/jfrog-client-go/utils/log"
 
 	"github.com/jfrog/jfrog-cli-application/apptrust/app"
 	"github.com/jfrog/jfrog-cli-application/apptrust/commands"
@@ -25,6 +32,7 @@ type createAppCommand struct {
 	serverDetails      *coreConfig.ServerDetails
 	applicationService applications.ApplicationService
 	requestBody        *model.AppDescriptor
+	responseBody       []byte
 }
 
 func (cac *createAppCommand) Run() error {
@@ -33,7 +41,8 @@ func (cac *createAppCommand) Run() error {
 		return err
 	}
 
-	return cac.applicationService.CreateApplication(ctx, cac.requestBody)
+	cac.responseBody, err = cac.applicationService.CreateApplication(ctx, cac.requestBody)
+	return err
 }
 
 func (cac *createAppCommand) ServerDetails() (*coreConfig.ServerDetails, error) {
@@ -127,7 +136,16 @@ func (cac *createAppCommand) prepareAndRunCommand(ctx *components.Context) error
 		return err
 	}
 
-	return commonCLiCommands.Exec(cac)
+	outputFormat, err := ctx.GetOutputFormat()
+	if err != nil {
+		return err
+	}
+
+	if err = commonCLiCommands.Exec(cac); err != nil {
+		return err
+	}
+
+	return printCreateAppResponse(cac.responseBody, outputFormat, os.Stdout)
 }
 
 func validateCreateAppContext(ctx *components.Context) error {
@@ -161,15 +179,67 @@ func validateNoSpecAndFlagsTogether(ctx *components.Context) error {
 	return nil
 }
 
+// orderedCreateAppKeys defines the display order for app-create table output.
+var orderedCreateAppKeys = []string{
+	"application_key",
+	"application_name",
+	"project_key",
+	"description",
+	"criticality",
+	"maturity_level",
+}
+
+// printCreateAppResponse formats and prints the create-application response.
+// When outputFormat is Table it renders a FIELD/VALUE table; when Json it
+// pretty-prints the raw JSON; when None (flag absent) it falls back to the
+// previous log.Output behaviour for backward-compatibility.
+func printCreateAppResponse(data []byte, outputFormat coreformat.OutputFormat, w io.Writer) error {
+	switch outputFormat {
+	case coreformat.Json:
+		log.Output(clientUtils.IndentJson(data))
+		return nil
+	case coreformat.Table:
+		return printCreateAppTable(data, w)
+	default:
+		// No --format flag provided: preserve the original output behaviour.
+		log.Output(string(data))
+		return nil
+	}
+}
+
+// printCreateAppTable renders the create-application response as a FIELD/VALUE table.
+func printCreateAppTable(data []byte, w io.Writer) error {
+	var fields map[string]interface{}
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return fmt.Errorf("failed to parse application response: %w", err)
+	}
+
+	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(tw, "FIELD\tVALUE")
+	for _, key := range orderedCreateAppKeys {
+		val, ok := fields[key]
+		if !ok || val == nil {
+			continue
+		}
+		strVal := fmt.Sprintf("%v", val)
+		if strVal == "" {
+			continue
+		}
+		fmt.Fprintf(tw, "%s\t%s\n", key, strVal)
+	}
+	return tw.Flush()
+}
+
 func GetCreateAppCommand(appContext app.Context) components.Command {
 	cmd := &createAppCommand{
 		applicationService: appContext.GetApplicationService(),
 	}
 	return components.Command{
-		Name:        commands.AppCreate,
-		Description: "Create a new application.",
-		Category:    common.CategoryApplication,
-		Aliases:     []string{"ac"},
+		Name:             commands.AppCreate,
+		Description:      "Create a new application.",
+		Category:         common.CategoryApplication,
+		Aliases:          []string{"ac"},
+		SupportedFormats: []coreformat.OutputFormat{coreformat.Table, coreformat.Json},
 		Arguments: []components.Argument{
 			{
 				Name:        "application-key",
