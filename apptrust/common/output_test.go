@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	coreformat "github.com/jfrog/jfrog-cli-core/v2/common/format"
-	"github.com/jfrog/jfrog-client-go/utils/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -15,26 +14,20 @@ const sampleOutputJSON = `{"key":"alpha","extra":"beta"}`
 
 var orderedOutputKeys = []string{"key", "extra", "missing"}
 
-func TestPrintJsonOrTableResponse_JSON(t *testing.T) {
-	var logBuf bytes.Buffer
-	prevLogger := log.GetLogger()
-	log.SetLogger(log.NewLogger(log.INFO, &logBuf))
-	t.Cleanup(func() { log.SetLogger(prevLogger) })
-
+func TestPrintResponse_JSON(t *testing.T) {
 	var buf bytes.Buffer
-	err := PrintJsonOrTableResponse([]byte(sampleOutputJSON), coreformat.Json, &buf, orderedOutputKeys)
+	err := PrintResponse([]byte(sampleOutputJSON), coreformat.Json, &buf, orderedOutputKeys)
 	assert.NoError(t, err)
-	assert.Empty(t, buf.String(), "Json branch must not write to the io.Writer")
 
 	var parsed map[string]interface{}
-	require.NoError(t, json.Unmarshal(logBuf.Bytes(), &parsed))
+	require.NoError(t, json.Unmarshal(buf.Bytes(), &parsed))
 	assert.Equal(t, "alpha", parsed["key"])
 	assert.Equal(t, "beta", parsed["extra"])
 }
 
-func TestPrintJsonOrTableResponse_Table(t *testing.T) {
+func TestPrintResponse_Table(t *testing.T) {
 	var buf bytes.Buffer
-	err := PrintJsonOrTableResponse([]byte(sampleOutputJSON), coreformat.Table, &buf, orderedOutputKeys)
+	err := PrintResponse([]byte(sampleOutputJSON), coreformat.Table, &buf, orderedOutputKeys)
 	assert.NoError(t, err)
 	output := buf.String()
 	assert.Contains(t, output, "FIELD")
@@ -45,10 +38,10 @@ func TestPrintJsonOrTableResponse_Table(t *testing.T) {
 	assert.Contains(t, output, "beta")
 }
 
-func TestPrintJsonOrTableResponse_Table_AbsentFieldsOmitted(t *testing.T) {
+func TestPrintResponse_Table_AbsentFieldsOmitted(t *testing.T) {
 	payload := `{"key":"only-key"}`
 	var buf bytes.Buffer
-	err := PrintJsonOrTableResponse([]byte(payload), coreformat.Table, &buf, orderedOutputKeys)
+	err := PrintResponse([]byte(payload), coreformat.Table, &buf, orderedOutputKeys)
 	assert.NoError(t, err)
 	output := buf.String()
 	assert.Contains(t, output, "key")
@@ -57,15 +50,23 @@ func TestPrintJsonOrTableResponse_Table_AbsentFieldsOmitted(t *testing.T) {
 	assert.NotContains(t, output, "missing")
 }
 
-func TestPrintJsonOrTableResponse_None_BackwardCompat(t *testing.T) {
+func TestPrintResponse_None_NoOutput(t *testing.T) {
 	var buf bytes.Buffer
-	err := PrintJsonOrTableResponse([]byte(sampleOutputJSON), coreformat.None, &buf, orderedOutputKeys)
+	err := PrintResponse([]byte(sampleOutputJSON), coreformat.None, &buf, orderedOutputKeys)
 	assert.NoError(t, err)
+	assert.Empty(t, buf.String(), "None format must produce no output")
 }
 
-func TestPrintJsonOrTableResponse_Table_InvalidJSON(t *testing.T) {
+func TestPrintResponse_Table_EmptyData(t *testing.T) {
 	var buf bytes.Buffer
-	err := PrintJsonOrTableResponse([]byte("not-json"), coreformat.Table, &buf, orderedOutputKeys)
+	err := PrintResponse([]byte("   \n"), coreformat.Table, &buf, orderedOutputKeys)
+	assert.NoError(t, err)
+	assert.Empty(t, buf.String(), "empty data must produce no output")
+}
+
+func TestPrintResponse_Table_InvalidJSON(t *testing.T) {
+	var buf bytes.Buffer
+	err := PrintResponse([]byte("not-json"), coreformat.Table, &buf, orderedOutputKeys)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "failed to parse response")
 }

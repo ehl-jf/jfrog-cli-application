@@ -140,7 +140,7 @@ func (cac *createAppCommand) prepareAndRunCommand(ctx *components.Context) error
 		return err
 	}
 
-	return common.PrintJsonOrTableResponse(cac.responseBody, outputFormat, os.Stdout, common.OrderedAppKeys)
+	return common.PrintResponse(cac.responseBody, outputFormat, os.Stdout, common.OrderedAppKeys)
 }
 
 func validateCreateAppContext(ctx *components.Context) error {

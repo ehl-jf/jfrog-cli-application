@@ -83,7 +83,7 @@ func (uac *updateAppCommand) prepareAndRunCommand(ctx *components.Context) error
 		return err
 	}
 
-	return common.PrintJsonOrTableResponse(uac.responseBody, outputFormat, os.Stdout, common.OrderedAppKeys)
+	return common.PrintResponse(uac.responseBody, outputFormat, os.Stdout, common.OrderedAppKeys)
 }
 
 

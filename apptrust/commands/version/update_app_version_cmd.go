@@ -78,7 +78,7 @@ func (uv *updateAppVersionCommand) prepareAndRunCommand(ctx *components.Context)
 		return err
 	}
 
-	return common.PrintJsonOrTableResponse(uv.responseBody, outputFormat, os.Stdout, common.OrderedAppVersionKeys)
+	return common.PrintResponse(uv.responseBody, outputFormat, os.Stdout, common.OrderedAppVersionKeys)
 }
 
 // parseFlagsAndSetFields parses CLI flags and sets struct fields accordingly.

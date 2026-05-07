@@ -17,6 +17,15 @@ import (
 	coreConfig "github.com/jfrog/jfrog-cli-core/v2/utils/config"
 )
 
+// orderedBindPackageKeys defines the display order for package-bind table output.
+var orderedBindPackageKeys = []string{
+	"application_key",
+	"package_type",
+	"package_name",
+	"package_version",
+	"status",
+}
+
 type bindPackageCommand struct {
 	packageService packages.PackageService
 	serverDetails  *coreConfig.ServerDetails
@@ -63,7 +72,7 @@ func (bp *bindPackageCommand) prepareAndRunCommand(ctx *components.Context) erro
 		return err
 	}
 
-	return common.PrintJsonOrTableResponse(bp.responseBody, outputFormat, os.Stdout, orderedBindPackageKeys)
+	return common.PrintResponse(bp.responseBody, outputFormat, os.Stdout, orderedBindPackageKeys)
 }
 
 func (bp *bindPackageCommand) extractFromArgs(ctx *components.Context) {
@@ -77,15 +86,6 @@ func (bp *bindPackageCommand) extractFromArgs(ctx *components.Context) {
 		Name:    packageName,
 		Version: version,
 	}
-}
-
-// orderedBindPackageKeys defines the display order for package-bind table output.
-var orderedBindPackageKeys = []string{
-	"application_key",
-	"package_type",
-	"package_name",
-	"package_version",
-	"status",
 }
 
 

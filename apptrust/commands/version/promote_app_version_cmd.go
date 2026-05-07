@@ -20,6 +20,15 @@ import (
 	"github.com/jfrog/jfrog-client-go/utils/errorutils"
 )
 
+// orderedPromoteAppVersionKeys defines the display order for version-promote table output.
+var orderedPromoteAppVersionKeys = []string{
+	"application_key",
+	"version",
+	"target_stage",
+	"status",
+	"current_stage",
+}
+
 type promoteAppVersionCommand struct {
 	versionService versions.VersionService
 	serverDetails  *coreConfig.ServerDetails
@@ -79,18 +88,8 @@ func (pv *promoteAppVersionCommand) prepareAndRunCommand(ctx *components.Context
 		return err
 	}
 
-	return common.PrintJsonOrTableResponse(pv.responseBody, outputFormat, os.Stdout, orderedPromoteAppVersionKeys)
+	return common.PrintResponse(pv.responseBody, outputFormat, os.Stdout, orderedPromoteAppVersionKeys)
 }
-
-// orderedPromoteAppVersionKeys defines the display order for version-promote table output.
-var orderedPromoteAppVersionKeys = []string{
-	"application_key",
-	"version",
-	"target_stage",
-	"status",
-	"current_stage",
-}
-
 
 func (pv *promoteAppVersionCommand) buildRequestPayload(ctx *components.Context) (*model.PromoteAppVersionRequest, error) {
 	stage := ctx.Arguments[2]

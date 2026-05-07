@@ -1,6 +1,7 @@
 package common
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,21 +9,20 @@ import (
 
 	coreformat "github.com/jfrog/jfrog-cli-core/v2/common/format"
 	clientUtils "github.com/jfrog/jfrog-client-go/utils"
-	"github.com/jfrog/jfrog-client-go/utils/log"
 )
 
-// PrintJsonOrTableResponse formats and prints a JSON response body.
+// PrintResponse formats and prints a JSON response body to w.
 // Json: pretty-prints the JSON. Table: renders a FIELD/VALUE table using orderedKeys.
-// None/default: falls back to raw string output for backward compatibility.
-func PrintJsonOrTableResponse(data []byte, outputFormat coreformat.OutputFormat, w io.Writer, orderedKeys []string) error {
+// None (no --format flag): no output, preserving pre-flag behavior where commands
+// signal success only via their log.Info message.
+func PrintResponse(data []byte, outputFormat coreformat.OutputFormat, w io.Writer, orderedKeys []string) error {
 	switch outputFormat {
 	case coreformat.Json:
-		log.Output(clientUtils.IndentJson(data))
-		return nil
+		_, err := fmt.Fprintln(w, clientUtils.IndentJson(data))
+		return err
 	case coreformat.Table:
 		return PrintTable(data, w, orderedKeys)
 	default:
-		log.Output(string(data))
 		return nil
 	}
 }
@@ -30,6 +30,9 @@ func PrintJsonOrTableResponse(data []byte, outputFormat coreformat.OutputFormat,
 // PrintTable renders data as a FIELD/VALUE table using orderedKeys for display order.
 // Fields absent from data or with empty/nil values are omitted.
 func PrintTable(data []byte, w io.Writer, orderedKeys []string) error {
+	if len(bytes.TrimSpace(data)) == 0 {
+		return nil
+	}
 	var fields map[string]interface{}
 	if err := json.Unmarshal(data, &fields); err != nil {
 		return fmt.Errorf("failed to parse response: %w", err)

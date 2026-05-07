@@ -20,6 +20,14 @@ import (
 	"github.com/jfrog/jfrog-client-go/utils/errorutils"
 )
 
+// orderedReleaseAppVersionKeys defines the display order for version-release table output.
+var orderedReleaseAppVersionKeys = []string{
+	"application_key",
+	"version",
+	"status",
+	"current_stage",
+}
+
 type releaseAppVersionCommand struct {
 	versionService versions.VersionService
 	serverDetails  *coreConfig.ServerDetails
@@ -79,17 +87,8 @@ func (rv *releaseAppVersionCommand) prepareAndRunCommand(ctx *components.Context
 		return err
 	}
 
-	return common.PrintJsonOrTableResponse(rv.responseBody, outputFormat, os.Stdout, orderedReleaseAppVersionKeys)
+	return common.PrintResponse(rv.responseBody, outputFormat, os.Stdout, orderedReleaseAppVersionKeys)
 }
-
-// orderedReleaseAppVersionKeys defines the display order for version-release table output.
-var orderedReleaseAppVersionKeys = []string{
-	"application_key",
-	"version",
-	"status",
-	"current_stage",
-}
-
 
 func (rv *releaseAppVersionCommand) buildRequestPayload(ctx *components.Context) (*model.ReleaseAppVersionRequest, error) {
 	promotionType, includedRepos, excludedRepos, err := BuildPromotionParams(ctx)

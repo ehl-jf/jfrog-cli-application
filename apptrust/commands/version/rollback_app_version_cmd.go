@@ -19,6 +19,15 @@ import (
 	coreConfig "github.com/jfrog/jfrog-cli-core/v2/utils/config"
 )
 
+// orderedRollbackAppVersionKeys defines the display order for version-rollback table output.
+var orderedRollbackAppVersionKeys = []string{
+	"application_key",
+	"version",
+	"project_key",
+	"rollback_from_stage",
+	"rollback_to_stage",
+}
+
 type rollbackAppVersionCommand struct {
 	versionService versions.VersionService
 	serverDetails  *coreConfig.ServerDetails
@@ -75,18 +84,8 @@ func (rv *rollbackAppVersionCommand) prepareAndRunCommand(ctx *components.Contex
 		return err
 	}
 
-	return common.PrintJsonOrTableResponse(rv.responseBody, outputFormat, os.Stdout, orderedRollbackAppVersionKeys)
+	return common.PrintResponse(rv.responseBody, outputFormat, os.Stdout, orderedRollbackAppVersionKeys)
 }
-
-// orderedRollbackAppVersionKeys defines the display order for version-rollback table output.
-var orderedRollbackAppVersionKeys = []string{
-	"application_key",
-	"version",
-	"project_key",
-	"rollback_from_stage",
-	"rollback_to_stage",
-}
-
 
 func GetRollbackAppVersionCommand(appContext app.Context) components.Command {
 	cmd := &rollbackAppVersionCommand{

@@ -71,7 +71,7 @@ func (cv *createAppVersionCommand) prepareAndRunCommand(ctx *components.Context)
 		return err
 	}
 
-	return common.PrintJsonOrTableResponse(cv.responseBody, outputFormat, os.Stdout, common.OrderedAppVersionKeys)
+	return common.PrintResponse(cv.responseBody, outputFormat, os.Stdout, common.OrderedAppVersionKeys)
 }
 
 func (cv *createAppVersionCommand) buildRequestPayload(ctx *components.Context) (*model.CreateAppVersionRequest, error) {

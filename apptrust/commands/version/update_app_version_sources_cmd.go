@@ -79,7 +79,7 @@ func (cmd *updateAppVersionSourcesCommand) prepareAndRunCommand(ctx *components.
 		return err
 	}
 
-	return common.PrintJsonOrTableResponse(cmd.responseBody, outputFormat, os.Stdout, common.OrderedAppVersionKeys)
+	return common.PrintResponse(cmd.responseBody, outputFormat, os.Stdout, common.OrderedAppVersionKeys)
 }
 
 func validateUpdateSourcesContext(ctx *components.Context) error {
