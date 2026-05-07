@@ -140,7 +140,7 @@ func (cac *createAppCommand) prepareAndRunCommand(ctx *components.Context) error
 		return err
 	}
 
-	return common.PrintJsonOrTableResponse(cac.responseBody, outputFormat, os.Stdout, orderedCreateAppKeys)
+	return common.PrintJsonOrTableResponse(cac.responseBody, outputFormat, os.Stdout, common.OrderedAppKeys)
 }
 
 func validateCreateAppContext(ctx *components.Context) error {
@@ -173,17 +173,6 @@ func validateNoSpecAndFlagsTogether(ctx *components.Context) error {
 	}
 	return nil
 }
-
-// orderedCreateAppKeys defines the display order for app-create table output.
-var orderedCreateAppKeys = []string{
-	"application_key",
-	"application_name",
-	"project_key",
-	"description",
-	"criticality",
-	"maturity_level",
-}
-
 
 func GetCreateAppCommand(appContext app.Context) components.Command {
 	cmd := &createAppCommand{

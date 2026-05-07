@@ -6,7 +6,9 @@ import (
 	"testing"
 
 	coreformat "github.com/jfrog/jfrog-cli-core/v2/common/format"
+	"github.com/jfrog/jfrog-client-go/utils/log"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const sampleOutputJSON = `{"key":"alpha","extra":"beta"}`
@@ -14,11 +16,20 @@ const sampleOutputJSON = `{"key":"alpha","extra":"beta"}`
 var orderedOutputKeys = []string{"key", "extra", "missing"}
 
 func TestPrintJsonOrTableResponse_JSON(t *testing.T) {
+	var logBuf bytes.Buffer
+	prevLogger := log.GetLogger()
+	log.SetLogger(log.NewLogger(log.INFO, &logBuf))
+	t.Cleanup(func() { log.SetLogger(prevLogger) })
+
 	var buf bytes.Buffer
 	err := PrintJsonOrTableResponse([]byte(sampleOutputJSON), coreformat.Json, &buf, orderedOutputKeys)
 	assert.NoError(t, err)
+	assert.Empty(t, buf.String(), "Json branch must not write to the io.Writer")
+
 	var parsed map[string]interface{}
-	assert.NoError(t, json.Unmarshal([]byte(sampleOutputJSON), &parsed))
+	require.NoError(t, json.Unmarshal(logBuf.Bytes(), &parsed))
+	assert.Equal(t, "alpha", parsed["key"])
+	assert.Equal(t, "beta", parsed["extra"])
 }
 
 func TestPrintJsonOrTableResponse_Table(t *testing.T) {

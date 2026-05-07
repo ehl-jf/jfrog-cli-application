@@ -71,18 +71,8 @@ func (cv *createAppVersionCommand) prepareAndRunCommand(ctx *components.Context)
 		return err
 	}
 
-	return common.PrintJsonOrTableResponse(cv.responseBody, outputFormat, os.Stdout, orderedCreateAppVersionKeys)
+	return common.PrintJsonOrTableResponse(cv.responseBody, outputFormat, os.Stdout, common.OrderedAppVersionKeys)
 }
-
-// orderedCreateAppVersionKeys defines the display order for version-create table output.
-var orderedCreateAppVersionKeys = []string{
-	"application_key",
-	"version",
-	"status",
-	"current_stage",
-	"tag",
-}
-
 
 func (cv *createAppVersionCommand) buildRequestPayload(ctx *components.Context) (*model.CreateAppVersionRequest, error) {
 	sources, filters, err := buildSourcesAndFiltersFromContext(ctx)

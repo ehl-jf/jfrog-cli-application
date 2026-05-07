@@ -83,17 +83,7 @@ func (uac *updateAppCommand) prepareAndRunCommand(ctx *components.Context) error
 		return err
 	}
 
-	return common.PrintJsonOrTableResponse(uac.responseBody, outputFormat, os.Stdout, orderedUpdateAppKeys)
-}
-
-// orderedUpdateAppKeys defines the display order for app-update table output.
-var orderedUpdateAppKeys = []string{
-	"application_key",
-	"application_name",
-	"project_key",
-	"description",
-	"criticality",
-	"maturity_level",
+	return common.PrintJsonOrTableResponse(uac.responseBody, outputFormat, os.Stdout, common.OrderedAppKeys)
 }
 
 

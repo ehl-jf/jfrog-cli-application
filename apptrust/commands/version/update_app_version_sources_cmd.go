@@ -79,7 +79,7 @@ func (cmd *updateAppVersionSourcesCommand) prepareAndRunCommand(ctx *components.
 		return err
 	}
 
-	return common.PrintJsonOrTableResponse(cmd.responseBody, outputFormat, os.Stdout, orderedUpdateAppVersionSourcesKeys)
+	return common.PrintJsonOrTableResponse(cmd.responseBody, outputFormat, os.Stdout, common.OrderedAppVersionKeys)
 }
 
 func validateUpdateSourcesContext(ctx *components.Context) error {
@@ -121,16 +121,6 @@ func (cmd *updateAppVersionSourcesCommand) buildRequestPayload(ctx *components.C
 		Filters:    filters,
 	}, nil
 }
-
-// orderedUpdateAppVersionSourcesKeys defines the display order for version-update-sources table output.
-var orderedUpdateAppVersionSourcesKeys = []string{
-	"application_key",
-	"version",
-	"status",
-	"current_stage",
-	"tag",
-}
-
 
 func GetUpdateAppVersionSourcesCommand(appContext app.Context) components.Command {
 	cmd := &updateAppVersionSourcesCommand{versionService: appContext.GetVersionService()}

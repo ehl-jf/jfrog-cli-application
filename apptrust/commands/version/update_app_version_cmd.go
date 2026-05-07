@@ -78,7 +78,7 @@ func (uv *updateAppVersionCommand) prepareAndRunCommand(ctx *components.Context)
 		return err
 	}
 
-	return common.PrintJsonOrTableResponse(uv.responseBody, outputFormat, os.Stdout, orderedUpdateAppVersionKeys)
+	return common.PrintJsonOrTableResponse(uv.responseBody, outputFormat, os.Stdout, common.OrderedAppVersionKeys)
 }
 
 // parseFlagsAndSetFields parses CLI flags and sets struct fields accordingly.
@@ -117,15 +117,6 @@ func (uv *updateAppVersionCommand) buildRequestPayload(ctx *components.Context) 
 	}
 
 	return request, nil
-}
-
-// orderedUpdateAppVersionKeys defines the display order for version-update table output.
-var orderedUpdateAppVersionKeys = []string{
-	"application_key",
-	"version",
-	"status",
-	"current_stage",
-	"tag",
 }
 
 

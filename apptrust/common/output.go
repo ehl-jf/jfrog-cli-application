@@ -41,7 +41,19 @@ func PrintTable(data []byte, w io.Writer, orderedKeys []string) error {
 		if !ok || val == nil {
 			continue
 		}
-		strVal := fmt.Sprintf("%v", val)
+		var strVal string
+		switch v := val.(type) {
+		case string:
+			strVal = v
+		case []interface{}, map[string]interface{}:
+			b, err := json.Marshal(v)
+			if err != nil {
+				return err
+			}
+			strVal = string(b)
+		default:
+			strVal = fmt.Sprintf("%v", v)
+		}
 		if strVal == "" {
 			continue
 		}
