@@ -121,6 +121,7 @@ func GetCreateAppVersionCommand(appContext app.Context) components.Command {
 		},
 		Flags:            commands.GetCommandFlags(commands.VersionCreate),
 		SupportedFormats: []coreformat.OutputFormat{coreformat.Table, coreformat.Json},
+		DefaultFormat:    coreformat.Json,
 		Action:           cmd.prepareAndRunCommand,
 	}
 }
