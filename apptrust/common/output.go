@@ -13,8 +13,8 @@ import (
 
 // PrintResponse formats and prints a JSON response body to w.
 // Json: pretty-prints the JSON. Table: renders a FIELD/VALUE table using orderedKeys.
-// None (no --format flag): no output, preserving pre-flag behavior where commands
-// signal success only via their log.Info message.
+// Commands set DefaultFormat: coreformat.Json so the default branch should not be reached;
+// it is kept as a no-op safety net.
 func PrintResponse(data []byte, outputFormat coreformat.OutputFormat, w io.Writer, orderedKeys []string) error {
 	switch outputFormat {
 	case coreformat.Json:

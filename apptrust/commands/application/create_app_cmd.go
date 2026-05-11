@@ -184,6 +184,7 @@ func GetCreateAppCommand(appContext app.Context) components.Command {
 		Category:         common.CategoryApplication,
 		Aliases:          []string{"ac"},
 		SupportedFormats: []coreformat.OutputFormat{coreformat.Table, coreformat.Json},
+		DefaultFormat:    coreformat.Json,
 		Arguments: []components.Argument{
 			{
 				Name:        "application-key",

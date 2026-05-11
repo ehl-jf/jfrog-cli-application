@@ -88,7 +88,6 @@ func (bp *bindPackageCommand) extractFromArgs(ctx *components.Context) {
 	}
 }
 
-
 func GetBindPackageCommand(appContext app.Context) components.Command {
 	cmd := &bindPackageCommand{packageService: appContext.GetPackageService()}
 	return components.Command{
@@ -116,6 +115,7 @@ func GetBindPackageCommand(appContext app.Context) components.Command {
 		},
 		Flags:            commands.GetCommandFlags(commands.PackageBind),
 		SupportedFormats: []coreformat.OutputFormat{coreformat.Table, coreformat.Json},
+		DefaultFormat:    coreformat.Json,
 		Action:           cmd.prepareAndRunCommand,
 	}
 }

@@ -110,6 +110,7 @@ func GetRollbackAppVersionCommand(appContext app.Context) components.Command {
 		},
 		Flags:            commands.GetCommandFlags(commands.VersionRollback),
 		SupportedFormats: []coreformat.OutputFormat{coreformat.Table, coreformat.Json},
+		DefaultFormat:    coreformat.Json,
 		Action:           cmd.prepareAndRunCommand,
 	}
 }

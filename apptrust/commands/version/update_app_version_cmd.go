@@ -119,7 +119,6 @@ func (uv *updateAppVersionCommand) buildRequestPayload(ctx *components.Context) 
 	return request, nil
 }
 
-
 func GetUpdateAppVersionCommand(appContext app.Context) components.Command {
 	cmd := &updateAppVersionCommand{versionService: appContext.GetVersionService()}
 	return components.Command{
@@ -141,6 +140,7 @@ func GetUpdateAppVersionCommand(appContext app.Context) components.Command {
 		},
 		Flags:            commands.GetCommandFlags(commands.VersionUpdate),
 		SupportedFormats: []coreformat.OutputFormat{coreformat.Table, coreformat.Json},
+		DefaultFormat:    coreformat.Json,
 		Action:           cmd.prepareAndRunCommand,
 	}
 }

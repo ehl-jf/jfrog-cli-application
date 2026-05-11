@@ -37,8 +37,8 @@ var (
 
 	AppTrustCli *coreTests.JfrogCli
 
-	testProjectKey  string
-	testPackageRes  *TestPackageResources
+	testProjectKey   string
+	testPackageRes   *TestPackageResources
 	testArtifactPath string
 )
 

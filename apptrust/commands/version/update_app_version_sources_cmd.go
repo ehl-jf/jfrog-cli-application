@@ -143,6 +143,7 @@ func GetUpdateAppVersionSourcesCommand(appContext app.Context) components.Comman
 		},
 		Flags:            commands.GetCommandFlags(commands.VersionUpdateSources),
 		SupportedFormats: []coreformat.OutputFormat{coreformat.Table, coreformat.Json},
+		DefaultFormat:    coreformat.Json,
 		Action:           cmd.prepareAndRunCommand,
 	}
 }

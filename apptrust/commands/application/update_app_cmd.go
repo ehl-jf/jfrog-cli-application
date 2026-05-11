@@ -86,7 +86,6 @@ func (uac *updateAppCommand) prepareAndRunCommand(ctx *components.Context) error
 	return common.PrintResponse(uac.responseBody, outputFormat, os.Stdout, common.OrderedAppKeys)
 }
 
-
 func GetUpdateAppCommand(appContext app.Context) components.Command {
 	cmd := &updateAppCommand{
 		applicationService: appContext.GetApplicationService(),
@@ -97,6 +96,7 @@ func GetUpdateAppCommand(appContext app.Context) components.Command {
 		Category:         common.CategoryApplication,
 		Aliases:          []string{"au"},
 		SupportedFormats: []coreformat.OutputFormat{coreformat.Table, coreformat.Json},
+		DefaultFormat:    coreformat.Json,
 		Arguments: []components.Argument{
 			{
 				Name:        "application-key",
