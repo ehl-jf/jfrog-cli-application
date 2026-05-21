@@ -60,6 +60,26 @@ func GetDeleteAppCommand(appContext app.Context) components.Command {
 	return components.Command{
 		Name:        commands.AppDelete,
 		Description: "Delete an application.",
+		AIDescription: `Permanently delete an application from AppTrust, identified by its application key.
+
+When to use:
+- Remove an application that is no longer maintained.
+- Clean up after creating an application with the wrong key.
+
+Prerequisites:
+- The application must exist.
+- Configured server and delete permission on the application's project.
+- Existing versions/bindings under the application may need to be removed first depending on platform policy.
+
+Common patterns:
+  $ jf apptrust app-delete my-app
+  $ jf at ad my-app --server-id=my-server
+
+Gotchas:
+- Deletion is irreversible and may fail if the application still has active versions or package bindings.
+- This does not delete artifacts in Artifactory; only the AppTrust application record is removed.
+
+Related: jf apptrust app-create, jf apptrust version-delete, jf apptrust package-unbind`,
 		Category:    common.CategoryApplication,
 		Aliases:     []string{"ad"},
 		Arguments: []components.Argument{

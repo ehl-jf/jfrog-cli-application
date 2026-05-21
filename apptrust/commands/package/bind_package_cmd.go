@@ -93,6 +93,29 @@ func GetBindPackageCommand(appContext app.Context) components.Command {
 	return components.Command{
 		Name:        commands.PackageBind,
 		Description: "Bind packages to an application.",
+		AIDescription: `Bind (associate) a specific package version to an existing application so that AppTrust tracks it as part of that application's catalog.
+
+When to use:
+- Declare that a published package version (npm, docker, maven, etc.) belongs to a given application for governance and traceability.
+- Pre-associate packages before creating an application version that includes them.
+
+Prerequisites:
+- The application (application-key) must already exist.
+- The package and version must already exist in Artifactory.
+- Configured server and bind permission on the application's project.
+
+Common patterns:
+  $ jf apptrust package-bind my-app docker my-image 1.0.0
+  $ jf apptrust package-bind my-app npm @scope/my-lib 2.3.1
+  $ jf apptrust package-bind my-app maven com.acme:widget 1.0.0
+  $ jf at pb my-app generic my-bundle 1.0.0 --server-id=my-server
+
+Gotchas:
+- All four positional arguments are required (application-key, package-type, package-name, package-version).
+- package-type must match a package type recognized by Artifactory (e.g., npm, docker, maven, generic).
+- Binding does not move artifacts; it only registers the association.
+
+Related: jf apptrust package-unbind, jf apptrust version-create`,
 		Category:    common.CategoryPackage,
 		Aliases:     []string{"pb"},
 		Arguments: []components.Argument{

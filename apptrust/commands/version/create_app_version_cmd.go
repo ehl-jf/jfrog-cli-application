@@ -105,6 +105,29 @@ func GetCreateAppVersionCommand(appContext app.Context) components.Command {
 	return components.Command{
 		Name:        commands.VersionCreate,
 		Description: "Create application version.",
+		AIDescription: `Create a new application version from one or more sources (builds, release bundles, other application versions, packages, or artifacts).
+
+When to use:
+- Assemble a new releasable application version from artifacts produced upstream in CI.
+- Create a draft version that can later be finalized via version-update-sources.
+
+Prerequisites:
+- The application (--app-key) must already exist (see app-create).
+- Configured server with AppTrust enabled and write permission on the application's project.
+- At least one source must be provided either via --spec or one of the --source-type-* flags.
+
+Common patterns:
+  $ jf apptrust version-create my-app 1.0.0 --source-type-builds="name=my-build, id=42"
+  $ jf apptrust version-create my-app 1.0.0 --source-type-packages="type=docker, name=my-image, version=1.0.0, repo-key=docker-local"
+  $ jf apptrust version-create my-app 1.0.0 --spec=version-spec.json --spec-vars="BUILD=42"
+  $ jf apptrust version-create my-app 1.0.0 --source-type-builds="name=b, id=1" --draft --dry-run
+
+Gotchas:
+- The version argument must be a valid SemVer string.
+- --spec cannot be combined with --source-type-* flags; choose one approach.
+- --sync defaults to true; pass --sync=false to return as soon as the request is accepted.
+
+Related: jf apptrust version-update-sources, jf apptrust version-promote, jf apptrust version-release`,
 		Category:    common.CategoryVersion,
 		Aliases:     []string{"vc"},
 		Arguments: []components.Argument{

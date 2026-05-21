@@ -63,6 +63,26 @@ func GetUnbindPackageCommand(appContext app.Context) components.Command {
 	return components.Command{
 		Name:        commands.PackageUnbind,
 		Description: "Unbind packages from an application.",
+		AIDescription: `Remove a previously created binding between a specific package version and an application.
+
+When to use:
+- Revoke an association between a package version and an application (e.g., the package was bound by mistake or moved to a different application).
+- Clean up bindings before deleting an application.
+
+Prerequisites:
+- The binding must currently exist.
+- Configured server and unbind permission on the application's project.
+
+Common patterns:
+  $ jf apptrust package-unbind my-app docker my-image 1.0.0
+  $ jf apptrust package-unbind my-app npm @scope/my-lib 2.3.1
+  $ jf at pu my-app maven com.acme:widget 1.0.0 --server-id=my-server
+
+Gotchas:
+- All four positional arguments are required and must exactly match the existing binding.
+- Unbinding does not delete the package from Artifactory; only the AppTrust association is removed.
+
+Related: jf apptrust package-bind, jf apptrust app-delete`,
 		Category:    common.CategoryPackage,
 		Aliases:     []string{"pu"},
 		Arguments: []components.Argument{

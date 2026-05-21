@@ -91,8 +91,31 @@ func GetUpdateAppCommand(appContext app.Context) components.Command {
 		applicationService: appContext.GetApplicationService(),
 	}
 	return components.Command{
-		Name:             commands.AppUpdate,
-		Description:      "Update an existing application",
+		Name:        commands.AppUpdate,
+		Description: "Update an existing application",
+		AIDescription: `Update metadata (display name, description, criticality, maturity, labels, owners) of an existing application identified by its key.
+
+When to use:
+- Change display attributes (name, description, criticality, maturity) of an existing application.
+- Add or remove labels, user owners, or group owners.
+
+Prerequisites:
+- The application must already exist (see app-create).
+- Configured server and update permission on the application's project.
+
+Common patterns:
+  $ jf apptrust app-update my-app --desc="Updated description"
+  $ jf apptrust app-update my-app --business-criticality=high --maturity-level=production
+  $ jf apptrust app-update my-app --add-labels="env=prod;tier=critical"
+  $ jf apptrust app-update my-app --remove-labels="env=staging"
+  $ jf apptrust app-update my-app --user-owners="alice;bob" --group-owners="platform-team"
+
+Gotchas:
+- --labels replaces the full label set; --add-labels and --remove-labels modify incrementally.
+- --user-owners and --group-owners replace the full owner list each time they are specified.
+- Application key cannot be changed; use app-delete and app-create if you need a different key.
+
+Related: jf apptrust app-create, jf apptrust app-delete`,
 		Category:         common.CategoryApplication,
 		Aliases:          []string{"au"},
 		SupportedFormats: []coreformat.OutputFormat{coreformat.Table, coreformat.Json},

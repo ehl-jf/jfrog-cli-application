@@ -94,6 +94,26 @@ func GetRollbackAppVersionCommand(appContext app.Context) components.Command {
 	return components.Command{
 		Name:        commands.VersionRollback,
 		Description: "Roll back application version promotion.",
+		AIDescription: `Roll back a previous promotion of an application version from a given stage, reverting artifact placement performed by that promotion.
+
+When to use:
+- Undo a recent promotion that introduced regressions or wrong content.
+- Revert a release that needs to be retracted from a stage.
+
+Prerequisites:
+- The application version must currently be promoted to the specified from-stage.
+- Configured server and rollback permission on the application's project.
+
+Common patterns:
+  $ jf apptrust version-rollback my-app 1.0.0 PROD
+  $ jf apptrust version-rollback my-app 1.0.0 STAGING --sync=false
+  $ jf at vrb my-app 1.0.0 QA --server-id=my-server
+
+Gotchas:
+- All three positional arguments (application-key, version, from-stage) are mandatory.
+- Rollback acts on the most recent promotion to from-stage; it does not delete the version itself (use version-delete for that).
+
+Related: jf apptrust version-promote, jf apptrust version-delete`,
 		Category:    common.CategoryVersion,
 		Aliases:     []string{"vrb"},
 		Arguments: []components.Argument{

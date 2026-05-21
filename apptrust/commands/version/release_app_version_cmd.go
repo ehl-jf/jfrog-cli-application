@@ -122,6 +122,28 @@ func GetReleaseAppVersionCommand(appContext app.Context) components.Command {
 	return components.Command{
 		Name:        commands.VersionRelease,
 		Description: "Release application version.",
+		AIDescription: `Release an application version, marking it as the final/released artifact set and optionally copying or moving artifacts according to the release configuration.
+
+When to use:
+- Finalize an application version after it has been promoted through earlier stages.
+- Produce the released set of artifacts for downstream consumers.
+
+Prerequisites:
+- The application version must already exist and be eligible for release.
+- Configured server and release permission on the application's project.
+
+Common patterns:
+  $ jf apptrust version-release my-app 1.0.0
+  $ jf apptrust version-release my-app 1.0.0 --promotion-type=move
+  $ jf apptrust version-release my-app 1.0.0 --include-repos="prod-local" --props="released=true"
+  $ jf apptrust version-release my-app 1.0.0 --overwrite-strategy=fail
+
+Gotchas:
+- Release is a one-way transition; use version-rollback to undo promotions but a released version typically cannot be re-released.
+- --promotion-type defaults to "copy".
+- --sync defaults to true; pass --sync=false for asynchronous behavior.
+
+Related: jf apptrust version-promote, jf apptrust version-rollback`,
 		Category:    common.CategoryVersion,
 		Aliases:     []string{"vr"},
 		Arguments: []components.Argument{

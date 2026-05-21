@@ -124,6 +124,28 @@ func GetUpdateAppVersionCommand(appContext app.Context) components.Command {
 	return components.Command{
 		Name:        commands.VersionUpdate,
 		Description: "Updates the user-defined annotations (tag and custom key-value properties) for a specified application version.",
+		AIDescription: `Update user-defined annotations on an existing application version: its tag and custom key-value properties. Does not modify sources or stage.
+
+When to use:
+- Attach metadata such as an environment label, release notes URL, or owner to an existing version.
+- Add or remove custom properties without changing the version content.
+
+Prerequisites:
+- The application version must already exist.
+- Configured server and update permission on the application's project.
+
+Common patterns:
+  $ jf apptrust version-update my-app 1.0.0 --tag=stable
+  $ jf apptrust version-update my-app 1.0.0 --properties="env=prod;owner=team-a,team-b"
+  $ jf apptrust version-update my-app 1.0.0 --delete-properties="env,owner"
+  $ jf apptrust version-update my-app 1.0.0 --tag=stable --properties="release-notes=https://example.com/notes"
+
+Gotchas:
+- --properties replaces values for the specified keys; other keys are untouched.
+- --delete-properties takes a comma-separated list of keys and removes those keys entirely.
+- This command does not change sources or promotion stage; use version-update-sources or version-promote for those.
+
+Related: jf apptrust version-update-sources, jf apptrust version-create`,
 		Category:    common.CategoryVersion,
 		Aliases:     []string{"vu"},
 		Arguments: []components.Argument{

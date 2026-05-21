@@ -126,6 +126,28 @@ func GetPromoteAppVersionCommand(appContext app.Context) components.Command {
 	return components.Command{
 		Name:        commands.VersionPromote,
 		Description: "Promote application version.",
+		AIDescription: `Promote an existing application version to a target stage (e.g., QA, STAGING, PROD), optionally copying or moving its artifacts.
+
+When to use:
+- Advance a tested application version to the next stage in your release lifecycle.
+- Apply additional artifact properties or filter included/excluded repositories during promotion.
+
+Prerequisites:
+- The application version must already exist and be in a state that permits promotion.
+- Configured server and promote permission on the target stage/project.
+
+Common patterns:
+  $ jf apptrust version-promote my-app 1.0.0 QA
+  $ jf apptrust version-promote my-app 1.0.0 PROD --promotion-type=move
+  $ jf apptrust version-promote my-app 1.0.0 STAGING --include-repos="repo-stage-local" --props="env=staging;owner=team"
+  $ jf apptrust version-promote my-app 1.0.0 PROD --overwrite-strategy=fail --dry-run
+
+Gotchas:
+- target-stage is a positional argument and must match a stage defined in your AppTrust configuration.
+- --promotion-type defaults to "copy"; using "move" deletes artifacts from the source repos.
+- --overwrite-strategy controls behavior when target repos already contain artifacts with the same path but different checksum.
+
+Related: jf apptrust version-release, jf apptrust version-rollback, jf apptrust version-create`,
 		Category:    common.CategoryVersion,
 		Aliases:     []string{"vp"},
 		Arguments: []components.Argument{

@@ -59,6 +59,25 @@ func GetDeleteAppVersionCommand(appContext app.Context) components.Command {
 	return components.Command{
 		Name:        commands.VersionDelete,
 		Description: "Delete application version.",
+		AIDescription: `Permanently delete an application version from the AppTrust service.
+
+When to use:
+- Clean up obsolete or invalid versions (e.g., failed drafts, test versions).
+- Free up names after an incorrect version was created.
+
+Prerequisites:
+- Configured server and delete permission on the application's project.
+- The version should not be actively promoted to stages you cannot reach with delete permissions.
+
+Common patterns:
+  $ jf apptrust version-delete my-app 1.0.0
+  $ jf at vd my-app 0.1.0-rc1 --server-id=my-server
+
+Gotchas:
+- Deletion is irreversible; consider version-rollback first if you only want to undo a promotion.
+- Deleting a released version may be restricted by platform policy.
+
+Related: jf apptrust version-rollback, jf apptrust version-create`,
 		Category:    common.CategoryVersion,
 		Aliases:     []string{"vd"},
 		Arguments: []components.Argument{

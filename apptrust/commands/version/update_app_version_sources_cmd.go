@@ -127,6 +127,29 @@ func GetUpdateAppVersionSourcesCommand(appContext app.Context) components.Comman
 	return components.Command{
 		Name:        commands.VersionUpdateSources,
 		Description: "Updates the sources for a draft application version.",
+		AIDescription: `Add sources (builds, release bundles, application versions, packages, or artifacts) and optional include/exclude filters to a draft application version.
+
+When to use:
+- Incrementally build up the content of a draft application version across multiple CI steps before finalizing.
+- Add late-arriving artifacts to a draft created earlier with version-create --draft.
+
+Prerequisites:
+- The application version must exist and be in draft state.
+- Configured server and update permission on the application's project.
+- At least one --source-type-* flag or a --spec is required.
+
+Common patterns:
+  $ jf apptrust version-update-sources my-app 1.0.0 --source-type-builds="name=integration-build, id=12"
+  $ jf apptrust version-update-sources my-app 1.0.0 --spec=sources.json --spec-vars="ENV=ci"
+  $ jf apptrust version-update-sources my-app 1.0.0 --source-type-packages="type=docker, name=img, version=1, repo-key=docker-local" --dry-run
+  $ jf apptrust version-update-sources my-app 1.0.0 --source-type-artifacts="path=repo/path/file.zip" --fail-fast=false
+
+Gotchas:
+- --spec cannot be combined with --source-type-* flags.
+- --fail-fast defaults to true; with multiple sources, one failure aborts the rest unless disabled.
+- Only applies to draft versions; released or promoted versions reject source changes.
+
+Related: jf apptrust version-create, jf apptrust version-update`,
 		Category:    common.CategoryVersion,
 		Aliases:     []string{"vus"},
 		Arguments: []components.Argument{

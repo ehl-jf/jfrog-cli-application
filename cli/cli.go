@@ -18,6 +18,25 @@ func GetJfrogCliApptrustApp() components.App {
 			Name:        "apptrust",
 			Aliases:     []string{"at"},
 			Description: "AppTrust commands.",
+			AIDescription: `JFrog AppTrust commands (alias: at) for managing applications, application versions, and package bindings.
+
+Use this namespace to:
+- Create, update, and delete applications (logical groupings of releasable units identified by an application key).
+- Create application versions from sources (builds, release bundles, application versions, packages, artifacts), promote them through stages, release them, roll back, and delete them.
+- Bind or unbind packages to/from an application.
+- Ping the AppTrust service to verify connectivity.
+
+Prerequisites:
+- A configured JFrog Platform server (jf c add or jf login) with AppTrust enabled, or per-command flags --url, --user, --access-token, --server-id.
+- Required permissions on the target project/application for write operations.
+
+Common patterns:
+  $ jf apptrust ping
+  $ jf apptrust app-create my-app --project=default
+  $ jf apptrust version-create my-app 1.0.0 --source-type-builds="name=my-build, id=1"
+  $ jf apptrust version-promote my-app 1.0.0 PROD
+
+Related: jf rt, jf release-bundle commands.`,
 			Category:    "Command Namespaces",
 			Commands: []components.Command{
 				system.GetPingCommand(appContext),

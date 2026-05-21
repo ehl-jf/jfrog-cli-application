@@ -50,6 +50,24 @@ func GetPingCommand(appContext app.Context) components.Command {
 	return components.Command{
 		Name:        commands.Ping,
 		Description: "Ping AppTrust server.",
+		AIDescription: `Send a health-check request to the AppTrust service on the configured JFrog Platform.
+
+When to use:
+- Verify that AppTrust is reachable and the configured credentials authenticate before running other apptrust commands.
+- Quickly diagnose connectivity or auth issues in CI scripts.
+
+Prerequisites:
+- A configured server (jf c add or jf login) or per-command flags --url and either --user/--access-token or --server-id.
+
+Common patterns:
+  $ jf apptrust ping
+  $ jf at p --server-id=my-server
+  $ jf apptrust ping --url=https://my.jfrog.io --access-token=$JFROG_TOKEN
+
+Gotchas:
+- Returns a non-zero exit code if the server is unreachable or credentials are invalid; does not verify per-application permissions.
+
+Related: jf c show, jf rt ping`,
 		Category:    common.CategorySystem,
 		Aliases:     []string{"p"},
 		Arguments:   []components.Argument{},

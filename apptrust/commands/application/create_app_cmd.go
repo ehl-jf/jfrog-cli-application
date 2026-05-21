@@ -179,8 +179,32 @@ func GetCreateAppCommand(appContext app.Context) components.Command {
 		applicationService: appContext.GetApplicationService(),
 	}
 	return components.Command{
-		Name:             commands.AppCreate,
-		Description:      "Create a new application.",
+		Name:        commands.AppCreate,
+		Description: "Create a new application.",
+		AIDescription: `Create a new application in AppTrust, identified by an application key and belonging to a project.
+
+When to use:
+- Register a new logical application that will own future versions and package bindings.
+- Bootstrap AppTrust governance for a new service or product.
+
+Prerequisites:
+- A configured server with AppTrust enabled.
+- Create permission on the target project.
+- Either --project (mandatory when no --spec is used) or a --spec file with project_key set.
+
+Common patterns:
+  $ jf apptrust app-create my-app --project=default
+  $ jf apptrust app-create my-app --project=default --application-name="My App" --desc="Service X"
+  $ jf apptrust app-create my-app --project=default --business-criticality=high --maturity-level=production
+  $ jf apptrust app-create my-app --project=default --labels="team=core;area=platform" --user-owners="alice;bob"
+  $ jf apptrust app-create my-app --spec=app-spec.json --spec-vars="ENV=prod"
+
+Gotchas:
+- --spec is mutually exclusive with --application-name, --project, --desc, --business-criticality, --maturity-level, --labels, --user-owners, --group-owners.
+- If --application-name is omitted, the application-key is used as the display name.
+- --labels uses semicolon separators (not commas) and key=value pairs.
+
+Related: jf apptrust app-update, jf apptrust app-delete, jf apptrust version-create`,
 		Category:         common.CategoryApplication,
 		Aliases:          []string{"ac"},
 		SupportedFormats: []coreformat.OutputFormat{coreformat.Table, coreformat.Json},
