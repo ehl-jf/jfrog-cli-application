@@ -78,8 +78,8 @@ Gotchas:
 - Deleting a released version may be restricted by platform policy.
 
 Related: jf apptrust version-rollback, jf apptrust version-create`,
-		Category:    common.CategoryVersion,
-		Aliases:     []string{"vd"},
+		Category: common.CategoryVersion,
+		Aliases:  []string{"vd"},
 		Arguments: []components.Argument{
 			{
 				Name:        "application-key",

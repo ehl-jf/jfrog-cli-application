@@ -68,10 +68,10 @@ Gotchas:
 - Returns a non-zero exit code if the server is unreachable or credentials are invalid; does not verify per-application permissions.
 
 Related: jf c show, jf rt ping`,
-		Category:    common.CategorySystem,
-		Aliases:     []string{"p"},
-		Arguments:   []components.Argument{},
-		Flags:       commands.GetCommandFlags(commands.Ping),
-		Action:      cmd.prepareAndRunCommand,
+		Category:  common.CategorySystem,
+		Aliases:   []string{"p"},
+		Arguments: []components.Argument{},
+		Flags:     commands.GetCommandFlags(commands.Ping),
+		Action:    cmd.prepareAndRunCommand,
 	}
 }

@@ -114,8 +114,8 @@ Gotchas:
 - Rollback acts on the most recent promotion to from-stage; it does not delete the version itself (use version-delete for that).
 
 Related: jf apptrust version-promote, jf apptrust version-delete`,
-		Category:    common.CategoryVersion,
-		Aliases:     []string{"vrb"},
+		Category: common.CategoryVersion,
+		Aliases:  []string{"vrb"},
 		Arguments: []components.Argument{
 			{
 				Name:        "application-key",

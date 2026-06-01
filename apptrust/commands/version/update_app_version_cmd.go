@@ -146,8 +146,8 @@ Gotchas:
 - This command does not change sources or promotion stage; use version-update-sources or version-promote for those.
 
 Related: jf apptrust version-update-sources, jf apptrust version-create`,
-		Category:    common.CategoryVersion,
-		Aliases:     []string{"vu"},
+		Category: common.CategoryVersion,
+		Aliases:  []string{"vu"},
 		Arguments: []components.Argument{
 			{
 				Name:        "app-key",

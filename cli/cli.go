@@ -37,7 +37,7 @@ Common patterns:
   $ jf apptrust version-promote my-app 1.0.0 PROD
 
 Related: jf rt, jf release-bundle commands.`,
-			Category:    "Command Namespaces",
+			Category: "Command Namespaces",
 			Commands: []components.Command{
 				system.GetPingCommand(appContext),
 				version.GetCreateAppVersionCommand(appContext),

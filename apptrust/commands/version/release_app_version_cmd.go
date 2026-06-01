@@ -144,8 +144,8 @@ Gotchas:
 - --sync defaults to true; pass --sync=false for asynchronous behavior.
 
 Related: jf apptrust version-promote, jf apptrust version-rollback`,
-		Category:    common.CategoryVersion,
-		Aliases:     []string{"vr"},
+		Category: common.CategoryVersion,
+		Aliases:  []string{"vr"},
 		Arguments: []components.Argument{
 			{
 				Name:        "application-key",

@@ -150,8 +150,8 @@ Gotchas:
 - Only applies to draft versions; released or promoted versions reject source changes.
 
 Related: jf apptrust version-create, jf apptrust version-update`,
-		Category:    common.CategoryVersion,
-		Aliases:     []string{"vus"},
+		Category: common.CategoryVersion,
+		Aliases:  []string{"vus"},
 		Arguments: []components.Argument{
 			{
 				Name:        "app-key",

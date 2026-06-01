@@ -80,8 +80,8 @@ Gotchas:
 - This does not delete artifacts in Artifactory; only the AppTrust application record is removed.
 
 Related: jf apptrust app-create, jf apptrust version-delete, jf apptrust package-unbind`,
-		Category:    common.CategoryApplication,
-		Aliases:     []string{"ad"},
+		Category: common.CategoryApplication,
+		Aliases:  []string{"ad"},
 		Arguments: []components.Argument{
 			{
 				Name:        "application-key",

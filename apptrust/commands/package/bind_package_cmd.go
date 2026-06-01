@@ -116,8 +116,8 @@ Gotchas:
 - Binding does not move artifacts; it only registers the association.
 
 Related: jf apptrust package-unbind, jf apptrust version-create`,
-		Category:    common.CategoryPackage,
-		Aliases:     []string{"pb"},
+		Category: common.CategoryPackage,
+		Aliases:  []string{"pb"},
 		Arguments: []components.Argument{
 			{
 				Name:        "application-key",

@@ -83,8 +83,8 @@ Gotchas:
 - Unbinding does not delete the package from Artifactory; only the AppTrust association is removed.
 
 Related: jf apptrust package-bind, jf apptrust app-delete`,
-		Category:    common.CategoryPackage,
-		Aliases:     []string{"pu"},
+		Category: common.CategoryPackage,
+		Aliases:  []string{"pu"},
 		Arguments: []components.Argument{
 			{
 				Name:        "application-key",

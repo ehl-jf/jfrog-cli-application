@@ -128,8 +128,8 @@ Gotchas:
 - --sync defaults to true; pass --sync=false to return as soon as the request is accepted.
 
 Related: jf apptrust version-update-sources, jf apptrust version-promote, jf apptrust version-release`,
-		Category:    common.CategoryVersion,
-		Aliases:     []string{"vc"},
+		Category: common.CategoryVersion,
+		Aliases:  []string{"vc"},
 		Arguments: []components.Argument{
 			{
 				Name:        "app-key",

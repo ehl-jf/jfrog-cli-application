@@ -148,8 +148,8 @@ Gotchas:
 - --overwrite-strategy controls behavior when target repos already contain artifacts with the same path but different checksum.
 
 Related: jf apptrust version-release, jf apptrust version-rollback, jf apptrust version-create`,
-		Category:    common.CategoryVersion,
-		Aliases:     []string{"vp"},
+		Category: common.CategoryVersion,
+		Aliases:  []string{"vp"},
 		Arguments: []components.Argument{
 			{
 				Name:        "application-key",
