@@ -112,7 +112,7 @@ Common patterns:
 
 Gotchas:
 - --labels replaces the full label set; --add-labels and --remove-labels modify incrementally.
-- --user-owners and --group-owners replace the full owner list each time they are specified.
+- --user-owners / --group-owners take a semicolon-separated list and send exactly the owners you specify; there are no incremental add/remove-owner flags (unlike --add-labels / --remove-labels for labels).
 - Application key cannot be changed; use app-delete and app-create if you need a different key.
 
 Related: jf apptrust app-create, jf apptrust app-delete`,

@@ -136,7 +136,7 @@ Common patterns:
   $ jf apptrust version-release my-app 1.0.0
   $ jf apptrust version-release my-app 1.0.0 --promotion-type=move
   $ jf apptrust version-release my-app 1.0.0 --include-repos="prod-local" --props="released=true"
-  $ jf apptrust version-release my-app 1.0.0 --overwrite-strategy=fail
+  $ jf apptrust version-release my-app 1.0.0 --overwrite-strategy=disabled
 
 Gotchas:
 - Release is a one-way transition; use version-rollback to undo promotions but a released version typically cannot be re-released.

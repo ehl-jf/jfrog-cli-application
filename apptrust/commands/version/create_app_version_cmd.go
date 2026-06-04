@@ -123,7 +123,7 @@ Common patterns:
   $ jf apptrust version-create my-app 1.0.0 --source-type-builds="name=b, id=1" --draft --dry-run
 
 Gotchas:
-- The version argument must be a valid SemVer string.
+- The version should follow SemVer convention (e.g. 1.0.0, 1.2.3-rc1); the CLI does not validate the format, but the platform may reject non-conforming values.
 - --spec cannot be combined with --source-type-* flags; choose one approach.
 - --sync defaults to true; pass --sync=false to return as soon as the request is accepted.
 

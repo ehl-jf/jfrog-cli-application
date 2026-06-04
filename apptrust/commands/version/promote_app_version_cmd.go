@@ -140,7 +140,7 @@ Common patterns:
   $ jf apptrust version-promote my-app 1.0.0 QA
   $ jf apptrust version-promote my-app 1.0.0 PROD --promotion-type=move
   $ jf apptrust version-promote my-app 1.0.0 STAGING --include-repos="repo-stage-local" --props="env=staging;owner=team"
-  $ jf apptrust version-promote my-app 1.0.0 PROD --overwrite-strategy=fail --dry-run
+  $ jf apptrust version-promote my-app 1.0.0 PROD --overwrite-strategy=disabled --dry-run
 
 Gotchas:
 - target-stage is a positional argument and must match a stage defined in your AppTrust configuration.

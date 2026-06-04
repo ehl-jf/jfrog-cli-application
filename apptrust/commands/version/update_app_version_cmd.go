@@ -142,6 +142,7 @@ Common patterns:
 
 Gotchas:
 - --properties replaces values for the specified keys; other keys are untouched.
+- --properties uses semicolons to separate key=value pairs and commas to separate multiple values for a single key: key1=v1,v2;key2=v3.
 - --delete-properties takes a comma-separated list of keys and removes those keys entirely.
 - This command does not change sources or promotion stage; use version-update-sources or version-promote for those.
 

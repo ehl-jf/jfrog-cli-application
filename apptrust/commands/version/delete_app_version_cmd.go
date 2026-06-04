@@ -74,7 +74,7 @@ Common patterns:
   $ jf at vd my-app 0.1.0-rc1 --server-id=my-server
 
 Gotchas:
-- Deletion is irreversible; consider version-rollback first if you only want to undo a promotion.
+- Deletion is irreversible and removes the version record itself. To undo a promotion without deleting the version, use version-rollback instead (it is a separate, orthogonal operation, not a softer delete).
 - Deleting a released version may be restricted by platform policy.
 
 Related: jf apptrust version-rollback, jf apptrust version-create`,
