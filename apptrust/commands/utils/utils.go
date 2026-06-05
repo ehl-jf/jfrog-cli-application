@@ -41,7 +41,7 @@ func ServerDetailsByFlags(ctx *components.Context) (*coreConfig.ServerDetails, e
 	return serverDetails, nil
 }
 
-// ParseSliceFlag parses a comma-separated string into a slice of strings.
+// ParseSliceFlag parses a semicolon-separated string into a slice of strings.
 func ParseSliceFlag(flagValue string) []string {
 	if flagValue == "" {
 		return []string{}

@@ -137,13 +137,13 @@ Prerequisites:
 Common patterns:
   $ jf apptrust version-update my-app 1.0.0 --tag=stable
   $ jf apptrust version-update my-app 1.0.0 --properties="env=prod;owner=team-a,team-b"
-  $ jf apptrust version-update my-app 1.0.0 --delete-properties="env,owner"
+  $ jf apptrust version-update my-app 1.0.0 --delete-properties="env;owner"
   $ jf apptrust version-update my-app 1.0.0 --tag=stable --properties="release-notes=https://example.com/notes"
 
 Gotchas:
 - --properties replaces values for the specified keys; other keys are untouched.
 - --properties uses semicolons to separate key=value pairs and commas to separate multiple values for a single key: key1=v1,v2;key2=v3.
-- --delete-properties takes a comma-separated list of keys and removes those keys entirely.
+- --delete-properties takes a semicolon-separated list of keys and removes those keys entirely.
 - This command does not change sources or promotion stage; use version-update-sources or version-promote for those.
 
 Related: jf apptrust version-update-sources, jf apptrust version-create`,
